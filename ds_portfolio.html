@@ -7,6 +7,145 @@
     <title>Pisces · Dinesh Surrya Portfolio</title>
     <link rel="stylesheet" href="portfolio_style.css">
     <script src="portfolio_content.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Project Arsenal Grid System (Internal to ensure visibility) */
+        .project-arsenal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 25px;
+            margin-top: 3rem;
+            padding-bottom: 5rem;
+        }
+
+        @media (max-width: 768px) {
+            .project-arsenal-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .arsenal-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            height: 480px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        .arsenal-card:hover {
+            border-color: #70d6ff;
+            box-shadow: 0 0 50px rgba(112, 214, 255, 0.3);
+            transform: translateY(-15px);
+        }
+
+        .arsenal-card-media {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background: #111;
+        }
+
+        .arsenal-card-media video,
+        .arsenal-card-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 1 !important;
+            transition: all 1s ease;
+            filter: contrast(1.1) brightness(1.2);
+        }
+
+        .arsenal-card:hover .arsenal-card-media video,
+        .arsenal-card:hover .arsenal-card-media img {
+            transform: scale(1.1);
+            filter: contrast(1.2) brightness(1.3);
+        }
+
+        .arsenal-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(3, 10, 30, 0.9) 0%, rgba(3, 10, 30, 0.2) 25%, transparent 60%);
+            z-index: 2;
+        }
+
+        .arsenal-card-content {
+            position: relative;
+            z-index: 3;
+            margin-top: auto;
+            padding: 2.2rem;
+            transition: transform 0.5s ease;
+        }
+
+        .arsenal-card-tag {
+            color: #70d6ff;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.8rem;
+            display: block;
+        }
+
+        .arsenal-card-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 0.8rem;
+            letter-spacing: -1px;
+            color: white;
+        }
+
+        .arsenal-card-desc {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+            max-width: 90%;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .arsenal-card:hover .arsenal-card-desc {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .arsenal-view-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .arsenal-view-btn i {
+            width: 35px;
+            height: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .arsenal-card:hover .arsenal-view-btn i {
+            background: white;
+            color: #030514;
+            transform: translateX(8px);
+        }
+    </style>
 </head>
 
 <body>
@@ -855,7 +994,7 @@
         });
 
         const addCursorHover = () => {
-            const targets = document.querySelectorAll('.pearl-orb, .split-orb, .bento-tile, .explore-btn, .close-hub, .audio-toggle, .project-card, .contact-btn');
+            const targets = document.querySelectorAll('.pearl-orb, .split-orb, .bento-tile, .explore-btn, .close-hub, .audio-toggle, .arsenal-card, .contact-btn');
             targets.forEach(t => {
                 t.addEventListener('mouseenter', () => {
                     dsCursor.classList.add('hover');
@@ -937,8 +1076,6 @@
 
         const openCapsule = (section) => {
             playPing(880, 0.03);
-
-            // Logic: Pull from centralized content file
             const content = PORTFOLIO_CONTENT.sections[section];
             if (!content) return;
 
@@ -946,42 +1083,93 @@
             capsuleOverlay.classList.add('active');
             addCursorHover(); // Refresh targets
 
-            // Initialize slider counter if it's the projects section
             if (section === 'projects') {
-                const slider = document.getElementById('projectSlider');
-                const counter = document.getElementById('sliderCounter');
-                if (slider && counter) {
-                    const updateCounter = () => {
-                        const card = slider.querySelector('.project-card');
-                        if (card) {
-                            const cardWidth = card.offsetWidth + 30; // width + gap
-                            const index = Math.round(slider.scrollLeft / cardWidth) + 1;
-                            counter.innerText = `${index} / 4`;
-                        }
-                    };
-                    slider.addEventListener('scroll', updateCounter);
-                    // Single-time run after content is inserted
-                    setTimeout(updateCounter, 100);
-                }
+                renderArsenal();
             }
         };
+
+        function renderArsenal() {
+            const grid = document.getElementById('projectArsenalGrid');
+            if (!grid) {
+                // FALLBACK: In case the template isn't updated, we inject the container
+                capsuleContent.innerHTML += `<div class="project-arsenal-grid" id="projectArsenalGrid"></div>`;
+                return renderArsenal();
+            }
+
+            const projects = PORTFOLIO_CONTENT.projectsData;
+            const projectKeys = Object.keys(projects);
+
+            // Visual Assets Library
+            const videoLibrary = [
+                'https://assets.mixkit.co/videos/preview/mixkit-abstract-blue-and-purple-ink-flowing-in-water-43306-prime.mp4',
+                'https://assets.mixkit.co/videos/preview/mixkit-abstract-fast-particles-background-v2-42171-prime.mp4',
+                'https://assets.mixkit.co/videos/preview/mixkit-abstract-moving-lines-of-white-light-on-black-background-42139-prime.mp4',
+                'https://assets.mixkit.co/videos/preview/mixkit-abstract-tunnel-composed-of-small-points-42111-prime.mp4'
+            ];
+            const imageLibrary = [
+                'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200',
+                'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200',
+                'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1200'
+            ];
+
+            projectKeys.forEach((key, index) => {
+                const p = projects[key];
+                const video = videoLibrary[index % videoLibrary.length];
+                const img = imageLibrary[index % imageLibrary.length];
+
+                const card = document.createElement('div');
+                card.className = 'arsenal-card';
+                card.innerHTML = `
+                    <div class="arsenal-card-media">
+                        <video loop muted playsinline><source src="${video}" type="video/mp4"></video>
+                        <img src="${img}" alt="${p.title}">
+                    </div>
+                    <div class="arsenal-card-content">
+                        <span class="arsenal-card-tag">${p.tag}</span>
+                        <h3 class="arsenal-card-title">${p.title}</h3>
+                        <p class="arsenal-card-desc">${p.desc.substring(0, 100)}...</p>
+                        <div class="arsenal-view-btn">
+                            <i>→</i>
+                            <span>View Case Study</span>
+                        </div>
+                    </div>
+                `;
+
+                card.addEventListener('mouseenter', () => card.querySelector('video').play());
+                card.addEventListener('mouseleave', () => card.querySelector('video').pause());
+                card.addEventListener('click', () => openProjectDetail(key));
+
+                grid.appendChild(card);
+            });
+
+            // Set Count
+            const badge = document.getElementById('projectCountBadge');
+            if (badge) badge.innerText = `The Arsenal // ${projectKeys.length} PROJECTS DETECTED`;
+
+            // GSAP Scroll Reveal Scroll Behavior
+            gsap.registerPlugin(ScrollTrigger);
+            document.querySelectorAll('.arsenal-card').forEach((card) => {
+                gsap.fromTo(card,
+                    { opacity: 0, y: 50, scale: 0.95 },
+                    {
+                        opacity: 1, y: 0, scale: 1,
+                        scrollTrigger: {
+                            trigger: card,
+                            scroller: "#capsuleOverlay", // This is the scrolling container
+                            start: "top 95%",
+                            end: "top 10%",
+                            toggleActions: "play reverse play reverse"
+                        }
+                    }
+                );
+            });
+        }
 
         const closeCapsule = () => {
             playPing(440, 0.02);
             capsuleOverlay.classList.remove('active');
         };
 
-        const scrollSlider = (direction) => {
-            const slider = document.getElementById('projectSlider');
-            if (slider) {
-                // Ensure one-by-one movement by scrolling exactly one card width + gap
-                const card = slider.querySelector('.project-card');
-                const cardWidth = card.offsetWidth;
-                const gap = 30; // Gap defined in CSS
-                slider.scrollBy({ left: direction * (cardWidth + gap), behavior: 'smooth' });
-                playPing(660, 0.01);
-            }
-        };
 
         const openProjectDetail = (pid) => {
             playPing(880, 0.03);
@@ -1008,35 +1196,6 @@
             addCursorHover();
         };
 
-        const handleReset = () => {
-            isFullscreenMode = false;
-            isSpinningUp = false;
-            activeExpandOrb = null;
-            mainSpeed = 0.3;
-            leftSpeed = 0.214;
-            rightSpeed = 0.25;
-
-            bgCanvas.style.opacity = '1';
-            leftWrapper.style.opacity = '1';
-            rightWrapper.style.opacity = '1';
-            leftWrapper.classList.remove('expanding');
-            rightWrapper.classList.remove('expanding');
-
-            document.body.classList.remove('fullscreen-mode');
-            [mainOrb, leftOrb, rightOrb].forEach(orb => {
-                orb.classList.remove('expanded', 'charging', 'fade-out', 'hidden');
-            });
-
-            leftWrapper.classList.remove('active');
-            rightWrapper.classList.remove('active');
-            centerLogo.classList.remove('visible');
-            guidanceText.style.opacity = '0';
-            setTimeout(() => {
-                guidanceText.innerText = phrases[0];
-                guidanceText.style.opacity = '1';
-                guidanceWrapper.style.opacity = '1';
-            }, 500);
-        };
 
         document.addEventListener('click', (e) => {
             // Only allow background-clicks to reset if we are on the selection screen or an active dialog is present
