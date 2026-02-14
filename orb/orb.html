@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinematic Orb Interaction</title>
+    <style>
+        :root {
+            --bg-deep: #020617;
+            --cyan-glow: #00e5ff;
+            --purple-glow: #7f5cff;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-deep);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        #app {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            transition: backdrop-filter 1s ease;
+        }
+
+        .blur-active {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        /* Orb Styling */
+        .orb {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent 70%);
+            border: 1px solid var(--border);
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05), 0 0 15px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+        }
+
+        .orb-inner {
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--cyan-glow) 0%, transparent 80%);
+            opacity: 0.3;
+            filter: blur(10px);
+        }
+
+        /* Layout Positioning */
+        #orb-left { left: 20%; transform: translateX(-50%); }
+        #orb-right { left: 80%; transform: translateX(-50%); }
+
+        /* Dialog Styling */
+        #dialog {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -40%);
+            width: 400px;
+            padding: 40px;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            text-align: center;
+            color: white;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 100;
+            transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        #dialog.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%);
+        }
+
+        h2 { font-size: 1.5rem; margin-bottom: 15px; letter-spacing: 2px; text-transform: uppercase; }
+        p { color: rgba(255,255,255,0.6); margin-bottom: 30px; line-height: 1.6; }
+
+        .btn-back {
+            background: white;
+            color: black;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-back:hover { transform: scale(1.05); }
+
+        .disabled { pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <div id="orb-left" class="orb"><div class="orb-inner"></div></div>
+        <div id="orb-right" class="orb"><div class="orb-inner"></div></div>
+
+        <div id="dialog">
+            <h2>System Stabilized</h2>
+            <p>The energy sequence is complete. You have successfully navigated the multi-phase transition.</p>
+            <button class="btn-back">BACK TO CORE</button>
+        </div>
+    </div>
+
+    <script>
+        const States = {
+            IDLE: 'IDLE',
+            CENTERING: 'CENTERING',
+            CHARGING: 'CHARGING',
+            SLOWING: 'SLOWING',
+            EXPANDING_FULLSCREEN: 'EXPANDING_FULLSCREEN',
+            BLURRED: 'BLURRED',
+            DIALOG_ACTIVE: 'DIALOG_ACTIVE',
+            STABLE: 'STABLE'
+        };
+
+        let currentState = States.IDLE;
+        const app = document.getElementById('app');
+        const dialog = document.getElementById('dialog');
+        const backBtn = document.querySelector('.btn-back');
+        const orbs = {
+            left: { el: document.getElementById('orb-left'), x: 20 },
+            right: { el: document.getElementById('orb-right'), x: 80 }
+        };
+
+        let activeOrb = null;
+        let inactiveOrb = null;
+        let animationData = {
+            rotation: 0,
+            rotationSpeed: 0.5,
+            scale: 1,
+            x: 0,
+            glowOpacity: 0.3,
+            glowColor: '#00e5ff'
+        };
+
+        function lerp(a, b, n) { return (1 - n) * a + n * b; }
+
+        function updateOrbTransform(orbObj, rotation, xPercent, scale) {
+            orbObj.el.style.left = `${xPercent}%`;
+            orbObj.el.style.transform = `translateX(-50%) rotate(${rotation}deg) scale(${scale})`;
+        }
+
+        function runPhaseSequence(side) {
+            if (currentState !== States.IDLE) return;
+            
+            activeOrb = orbs[side];
+            inactiveOrb = side === 'left' ? orbs.right : orbs.left;
+            animationData.x = activeOrb.x;
+            
+            // Phase 1: Centering + Acceleration
+            currentState = States.CENTERING;
+            let startTime = performance.now();
+
+            function animate(time) {
+                let elapsed = time - startTime;
+
+                if (currentState === States.CENTERING) {
+                    let progress = Math.min(elapsed / 1000, 1);
+                    animationData.x = lerp(activeOrb.x, 50, progress);
+                    animationData.rotationSpeed = lerp(0.5, 10, progress);
+                    inactiveOrb.el.style.opacity = lerp(1, 0.2, progress);
+                    
+                    if (progress >= 1) {
+                        currentState = States.CHARGING;
+                        startTime = time;
+                    }
+                } 
+                else if (currentState === States.CHARGING) {
+                    let progress = Math.min((time - startTime) / 1000, 1);
+                    animationData.rotationSpeed = 15;
+                    activeOrb.el.style.boxShadow = `0 0 ${progress * 40}px var(--cyan-glow)`;
+                    activeOrb.el.querySelector('.orb-inner').style.opacity = lerp(0.3, 0.8, progress);
+                    
+                    if (progress >= 1) {
+                        currentState = States.SLOWING;
+                        startTime = time;
+                    }
+                }
+                else if (currentState === States.SLOWING) {
+                    let progress = Math.min((time - startTime) / 1000, 1);
+                    animationData.rotationSpeed = lerp(15, 0, progress);
+                    animationData.glowColor = '#7f5cff'; // Shift to Purple
+                    activeOrb.el.querySelector('.orb-inner').style.background = `radial-gradient(circle, var(--purple-glow) 0%, transparent 80%)`;
+                    
+                    if (progress >= 1) {
+                        currentState = States.EXPANDING_FULLSCREEN;
+                        startTime = time;
+                    }
+                }
+                else if (currentState === States.EXPANDING_FULLSCREEN) {
+                    let progress = Math.min((time - startTime) / 2000, 1);
+                    let ease = 1 - Math.pow(1 - progress, 4); // EaseOutExpo
+                    animationData.scale = lerp(1, 15, ease);
+                    animationData.rotationSpeed = lerp(0, 0.5, progress);
+                    
+                    if (progress >= 1) {
+                        currentState = States.BLURRED;
+                        app.classList.add('blur-active');
+                        startTime = time;
+                    }
+                }
+                else if (currentState === States.BLURRED) {
+                    let progress = Math.min((time - startTime) / 1000, 1);
+                    animationData.scale = lerp(15, 1, progress);
+                    
+                    if (progress >= 1) {
+                        currentState = States.DIALOG_ACTIVE;
+                        dialog.classList.add('active');
+                        startTime = time;
+                    }
+                }
+                else if (currentState === States.DIALOG_ACTIVE) {
+                    let progress = Math.min((time - startTime) / 1500, 1);
+                    let ease = 1 - Math.pow(1 - progress, 3);
+                    animationData.scale = lerp(1, 2.5, ease); // Final moderate expansion
+                    
+                    if (progress >= 1) {
+                        currentState = States.STABLE;
+                    }
+                }
+
+                // Global updates
+                animationData.rotation += animationData.rotationSpeed;
+                updateOrbTransform(activeOrb, animationData.rotation, animationData.x, animationData.scale);
+                
+                // Idle rotation for inactive orb if idle
+                if (currentState === States.CENTERING) {
+                    updateOrbTransform(inactiveOrb, time * 0.05, inactiveOrb.x, 1);
+                }
+
+                if (currentState !== States.STABLE || (currentState === States.STABLE && dialog.classList.contains('active'))) {
+                    requestAnimationFrame(animate);
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function resetToIdle() {
+            dialog.classList.remove('active');
+            app.classList.remove('blur-active');
+            
+            let startTime = performance.now();
+            let startScale = animationData.scale;
+            let startX = animationData.x;
+            let startRotSpeed = animationData.rotationSpeed;
+
+            function backAnimate(time) {
+                let progress = Math.min((time - startTime) / 1000, 1);
+                let ease = 1 - Math.pow(1 - progress, 3);
+
+                animationData.scale = lerp(startScale, 1, ease);
+                animationData.x = lerp(startX, activeOrb === orbs.left ? 20 : 80, ease);
+                animationData.rotationSpeed = lerp(startRotSpeed, 0.5, ease);
+                inactiveOrb.el.style.opacity = lerp(0.2, 1, ease);
+                
+                // Reset colors and shadows
+                activeOrb.el.style.boxShadow = `none`;
+                activeOrb.el.querySelector('.orb-inner').style.opacity = 0.3;
+                activeOrb.el.querySelector('.orb-inner').style.background = `radial-gradient(circle, var(--cyan-glow) 0%, transparent 80%)`;
+
+                animationData.rotation += animationData.rotationSpeed;
+                updateOrbTransform(activeOrb, animationData.rotation, animationData.x, animationData.scale);
+                updateOrbTransform(inactiveOrb, time * 0.05, inactiveOrb.x, 1);
+
+                if (progress < 1) {
+                    requestAnimationFrame(backAnimate);
+                } else {
+                    currentState = States.IDLE;
+                }
+            }
+            requestAnimationFrame(backAnimate);
+        }
+
+        // Initialize Idle Rotation
+        function idleLoop(time) {
+            if (currentState === States.IDLE) {
+                updateOrbTransform(orbs.left, time * 0.03, 20, 1);
+                updateOrbTransform(orbs.right, time * 0.03, 80, 1);
+            }
+            requestAnimationFrame(idleLoop);
+        }
+        requestAnimationFrame(idleLoop);
+
+        // Listeners
+        orbs.left.el.onclick = () => runPhaseSequence('left');
+        orbs.right.el.onclick = () => runPhaseSequence('right');
+        backBtn.onclick = resetToIdle;
+
+    </script>
+</body>
+</html>

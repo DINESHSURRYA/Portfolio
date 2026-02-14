@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DS_66 | High-Altitude Traditional Messenger</title>
+    <style>
+        :root {
+            --bg-deep: #030514;
+            --text-ivory: #f1f1e6;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg-deep);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            overflow-x: hidden;
+            min-height: 600vh; /* Sufficient scroll for 9 projects */
+        }
+
+        /* Project Grid */
+        .arsenal-grid {
+            padding: 150px 10% 800px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            z-index: 5;
+            position: relative;
+        }
+
+        .project-card {
+            height: 500px;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- ASCENSION LAYER --- */
+        #ascension-container {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        #dynamic-svg {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+
+        .kite-group {
+            will-change: transform;
+            transition: transform 0.1s linear;
+        }
+
+        /* Traditional Kite Frame - Reduced Size (Scale 0.7) */
+        .kite-frame {
+            transform: scale(0.7);
+            animation: kiteSway 5s ease-in-out infinite;
+            transform-origin: center bottom;
+        }
+
+        @keyframes kiteSway {
+            0%, 100% { transform: scale(0.7) rotate(-2deg); }
+            50% { transform: scale(0.7) rotate(2deg); }
+        }
+
+        .ribbon {
+            animation: ribbonWave 3s ease-in-out infinite;
+            transform-origin: top center;
+        }
+
+        @keyframes ribbonWave {
+            0%, 100% { transform: rotate(-15deg); }
+            50% { transform: rotate(15deg); }
+        }
+
+        .bell-unit {
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            animation: bellJingle 2.5s ease-in-out infinite;
+            transform-origin: top center;
+        }
+
+        .bell-unit.active { opacity: 1; }
+
+        @keyframes bellJingle {
+            0%, 100% { transform: rotate(-10deg); }
+            50% { transform: rotate(10deg); }
+        }
+
+        .ds-branding {
+            font-weight: 800;
+            fill: var(--text-ivory);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+    </style>
+</head>
+<body>
+
+    <div class="arsenal-grid">
+        <div class="project-card">Smart Campus</div>
+        <div class="project-card">DataGuardian AI</div>
+        <div class="project-card">RAG-AI Chatbot</div>
+        <div class="project-card">RiskGuardian AI</div>
+        <div class="project-card">EcoMart</div>
+        <div class="project-card">Website Scraper</div>
+        <div class="project-card">YouTube Timestamp</div>
+        <div class="project-card">Student Hub</div>
+        <div class="project-card">Project 9</div>
+    </div>
+
+    <div id="ascension-container">
+        <svg id="dynamic-svg" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
+            <defs>
+                <linearGradient id="bellGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#996600" />
+                    <stop offset="50%" style="stop-color:#d4af37" />
+                    <stop offset="100%" style="stop-color:#7a5200" />
+                </linearGradient>
+
+                <symbol id="real-bell" viewBox="0 0 20 25">
+                    <circle cx="10" cy="21" r="2" fill="#5c4000" />
+                    <path d="M10,2 C6,2 3,6 3,10 L3,15 C3,18 1,19 1,20 L19,20 C19,19 17,18 17,15 L17,10 C17,6 14,2 10,2 Z" 
+                          fill="url(#bellGrad)" stroke="#5c4000" stroke-width="0.5" />
+                    <circle cx="10" cy="2" r="1.5" fill="none" stroke="#d4af37" stroke-width="1" />
+                </symbol>
+            </defs>
+
+            <path id="main-thread" d="" fill="none" stroke-width="3" stroke-linecap="round" />
+
+            <g id="kite-ascension-group" class="kite-group">
+                <g class="kite-frame">
+                    <path class="ribbon" d="M0,0 Q-40,50 -20,100" fill="none" stroke="#1e3a8a" stroke-width="4" stroke-linecap="round" />
+                    <path class="ribbon" d="M0,0 Q40,50 20,100" fill="none" stroke="#7c2d12" stroke-width="4" stroke-linecap="round" style="animation-delay: 0.5s;" />
+                    
+                    <circle cx="0" cy="0" r="5" fill="#111" />
+
+                    <path id="kite-body-path" d="M0,-220 L100,-110 L0,0 L-100,-110 Z" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+                    
+                    <text x="0" y="-110" text-anchor="middle" class="ds-branding">
+                        <tspan x="0" dy="0" font-size="32">DS</tspan>
+                        <tspan x="0" dy="28" font-size="14" fill-opacity="0.7">66</tspan>
+                    </text>
+                </g>
+            </g>
+
+            <g id="bell-layer"></g>
+        </svg>
+    </div>
+
+    <script>
+        const kiteGroup = document.getElementById('kite-ascension-group');
+        const kiteBody = document.getElementById('kite-body-path');
+        const mainThread = document.getElementById('main-thread');
+        const bellLayer = document.getElementById('bell-layer');
+        const cards = document.querySelectorAll('.project-card');
+
+        // Create 9 Traditional Bells for your 9 projects
+        const bells = [];
+        for(let i=0; i<9; i++) {
+            const bellG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            bellG.setAttribute("class", "bell-unit");
+            bellG.style.animationDelay = `${i * 0.3}s`;
+            bellG.innerHTML = `<use href="#real-bell" x="-8" y="0" width="16" height="20" />`;
+            bellLayer.appendChild(bellG);
+            bells.push(bellG);
+        }
+
+        function updateAscension() {
+            const scroll = window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight);
+            const vW = 1000; 
+            const vH = 1000;
+
+            // 1. Kite Positioning (Clamped: stays at top when scroll is finished)
+            const kX = vW - 150;
+            // Clamps kite at 8% height when scroll is near bottom
+            const kY = Math.max(vH * 0.08, vH * (1.1 - (scroll * 1.2))); 
+            kiteGroup.setAttribute("transform", `translate(${kX}, ${kY})`);
+
+            // 2. Independent Multi-Color Logic
+            // Kite Cycles Colors
+            const kiteHue = (Date.now() / 30) % 360;
+            kiteBody.setAttribute("fill", `hsl(${kiteHue}, 70%, 40%)`);
+            
+            // String Cycles Colors (Offset from kite)
+            const threadHue = (Date.now() / 20) % 360;
+            mainThread.setAttribute("stroke", `hsl(${threadHue}, 100%, 60%)`);
+
+            // 3. String Connection (Fixed to bottom-right anchor)
+            const tipX = kX;
+            const tipY = kY;
+            const anchorX = vW - 100;
+            const anchorY = vH;
+
+            const tension = Math.sin(scroll * Math.PI) * 120;
+            const ctrlX = anchorX - tension;
+            const ctrlY = (anchorY + tipY) / 2;
+            mainThread.setAttribute('d', `M ${anchorX},${anchorY} Q ${ctrlX},${ctrlY} ${tipX},${tipY}`);
+
+            // 4. Bell Mapping (Accumulate according to project visibility)
+            let passedCount = 0;
+            cards.forEach(card => {
+                if(card.getBoundingClientRect().top < window.innerHeight * 0.75) passedCount++;
+            });
+
+            bells.forEach((bell, i) => {
+                if(i < passedCount) {
+                    bell.classList.add('active');
+                    // Position along Bezier curve
+                    const t = 0.15 + (i * 0.08); 
+                    const bx = Math.pow(1-t, 2)*anchorX + 2*(1-t)*t*ctrlX + Math.pow(t, 2)*tipX;
+                    const by = Math.pow(1-t, 2)*anchorY + 2*(1-t)*t*ctrlY + Math.pow(t, 2)*tipY;
+                    bell.setAttribute("transform", `translate(${bx}, ${by})`);
+                } else {
+                    bell.classList.remove('active');
+                }
+            });
+
+            requestAnimationFrame(updateAscension);
+        }
+
+        requestAnimationFrame(updateAscension);
+    </script>
+</body>
+</html>

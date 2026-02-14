@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DS Custom Cursor</title>
+    <style>
+        :root {
+            --ds-glow: #ff4d6d;
+            --ds-sharp: #ffffff;
+        }
+
+        body {
+            background: #050000;
+            height: 100vh;
+            margin: 0;
+            cursor: none; /* Hide default cursor */
+            overflow: hidden;
+        }
+
+        /* The Main DS Cursor */
+        #ds-cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 50px;
+            height: 50px;
+            pointer-events: none;
+            z-index: 999999;
+            transform: translate(-50%, -50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.1s ease-out;
+        }
+
+        .ds-text {
+            font-family: 'Arial Black', sans-serif;
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--ds-sharp);
+            text-shadow: 0 0 10px var(--ds-glow), 0 0 20px var(--ds-glow);
+            letter-spacing: -2px;
+            /* Pumping Animation */
+            animation: ds-pump 0.8s infinite cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Sharp Edge Detail */
+        .sharp-point {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 20px solid var(--ds-sharp);
+            transform: rotate(-45deg) translate(-10px, -10px);
+            filter: drop-shadow(0 0 5px var(--ds-glow));
+        }
+
+        @keyframes ds-pump {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.8; }
+        }
+
+        /* Trail Particles */
+        .ds-trail {
+            position: fixed;
+            pointer-events: none;
+            font-family: 'Arial Black', sans-serif;
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--ds-glow);
+            z-index: 999998;
+            animation: trail-fade 0.7s forwards linear;
+        }
+
+        @keyframes trail-fade {
+            0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0.2) rotate(45deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ds-cursor">
+        <div class="sharp-point"></div>
+        <div class="ds-text">DS</div>
+    </div>
+
+    <script>
+        const cursor = document.getElementById('ds-cursor');
+        let lastX = 0;
+        let lastY = 0;
+
+        // Smooth Cursor Follow
+        window.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+
+            // Sparkle Generation Logic
+            // Generate sparkle only if moved enough to prevent over-crowding
+            const dist = Math.hypot(e.clientX - lastX, e.clientY - lastY);
+            if (dist > 15) {
+                createSparkle(e.clientX, e.clientY);
+                lastX = e.clientX;
+                lastY = e.clientY;
+            }
+        });
+
+        function createSparkle(x, y) {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'ds-trail';
+            sparkle.innerText = 'DS';
+            
+            // Randomize sparkle offset slightly
+            const ox = (Math.random() - 0.5) * 20;
+            const oy = (Math.random() - 0.5) * 20;
+            
+            sparkle.style.left = (x + ox) + 'px';
+            sparkle.style.top = (y + oy) + 'px';
+            
+            // Random star/sparkle colors from your theme
+            const colors = ['#ff4d6d', '#ffd700', '#ffffff'];
+            sparkle.style.color = colors[Math.floor(Math.random() * colors.length)];
+            sparkle.style.textShadow = `0 0 8px ${sparkle.style.color}`;
+
+            document.body.appendChild(sparkle);
+
+            // Clean up DOM
+            setTimeout(() => {
+                sparkle.remove();
+            }, 700);
+        }
+
+        // Handle Click "Burst"
+        window.addEventListener('mousedown', () => {
+            cursor.style.transform = 'translate(-50%, -50%) scale(0.7)';
+            for(let i=0; i<8; i++) {
+                setTimeout(() => createSparkle(window.event.clientX, window.event.clientY), i * 50);
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+        });
+    </script>
+</body>
+</html>

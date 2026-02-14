@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>The Arsenal · Dinesh Surrya Projects</title>
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --accent: #70d6ff;
+            --accent-rgb: 112, 214, 255;
+            --bg: #030514;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --card-bg: rgba(10, 14, 35, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            cursor: none !important;
+        }
+
+        body {
+            background: var(--bg);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Deep Cosmic Background */
+        .cosmic-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: radial-gradient(circle at 50% 50%, #0a0e29 0%, #030514 100%);
+        }
+
+        .nebula {
+            position: absolute;
+            width: 80vw;
+            height: 80vw;
+            filter: blur(150px);
+            opacity: 0.1;
+            pointer-events: none;
+            background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+            animation: drift 30s infinite alternate ease-in-out;
+        }
+
+        @keyframes drift {
+            from {
+                transform: translate(-10%, -10%) scale(1);
+            }
+
+            to {
+                transform: translate(15%, 15%) scale(1.2);
+            }
+        }
+
+        /* Custom Cursor */
+        #custom-cursor {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transition: transform 0.2s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .cursor-outer {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .cursor-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: black;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 2rem 10%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(to bottom, rgba(3, 5, 20, 0.8), transparent);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+
+        .back-link:hover {
+            opacity: 1;
+        }
+
+        /* Header Area */
+        header {
+            padding: 10rem 10% 4rem;
+            text-align: left;
+        }
+
+        .persona-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: rgba(var(--accent-rgb), 0.1);
+            border: 1px solid rgba(var(--accent-rgb), 0.3);
+            border-radius: 20px;
+            color: var(--accent);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-size: clamp(3.5rem, 10vw, 7rem);
+            font-weight: 800;
+            line-height: 0.9;
+            letter-spacing: -4px;
+            background: linear-gradient(to bottom, #fff 30%, #444 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2rem;
+        }
+
+        .header-desc {
+            font-size: 1.4rem;
+            color: rgba(255, 255, 255, 0.5);
+            max-width: 700px;
+            line-height: 1.5;
+            font-weight: 300;
+        }
+
+        /* Project Shelves */
+        .section-title {
+            padding: 0 10% 2rem;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            color: var(--accent);
+            opacity: 0.8;
+            margin-top: 4rem;
+        }
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+            gap: 40px;
+            padding: 0 10% 10rem;
+        }
+
+        @media (max-width: 768px) {
+            .project-grid {
+                grid-template-columns: 1fr;
+                padding: 0 5% 5rem;
+            }
+        }
+
+        /* Premium Project Card */
+        .project-card {
+            background: rgba(255, 255, 255, 0.05);
+            /* Brighter glass base */
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            /* Clearly defined border */
+            border-radius: 30px;
+            height: 550px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .project-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 50px rgba(var(--accent-rgb), 0.3);
+            transform: translateY(-15px);
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            /* Minimal gradient for text legibility */
+            background: linear-gradient(to top,
+                    rgba(3, 10, 30, 0.9) 0%,
+                    rgba(3, 10, 30, 0.2) 25%,
+                    transparent 60%);
+            z-index: 2;
+        }
+
+        .card-media {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background: #111;
+            /* Visible fallback */
+        }
+
+        .card-media video,
+        .card-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 1 !important;
+            /* Forces maximum visibility */
+            transition: all 1s ease;
+            filter: contrast(1.1) brightness(1.2);
+        }
+
+        .project-card:hover .card-media video,
+        .project-card:hover .card-media img {
+            transform: scale(1.1);
+            filter: contrast(1.2) brightness(1.3);
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 3;
+            margin-top: auto;
+            padding: 2.5rem;
+            transition: transform 0.5s ease;
+        }
+
+        .card-tag {
+            color: var(--accent);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.8rem;
+            display: block;
+        }
+
+        .card-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+        }
+
+        .card-mini-desc {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.5;
+            margin-bottom: 2rem;
+            max-width: 80%;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .project-card:hover .card-mini-desc {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .view-case-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .view-case-btn i {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .project-card:hover .view-case-btn i {
+            background: white;
+            color: black;
+            transform: translateX(10px);
+        }
+
+        /* Cinematic Modal */
+        .modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(3, 5, 20, 0.98);
+            backdrop-filter: blur(30px);
+            display: none;
+            opacity: 0;
+            overflow-y: auto;
+            padding: 5rem 10%;
+        }
+
+        .modal-content {
+            max-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .close-modal {
+            position: fixed;
+            top: 3rem;
+            right: 3rem;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            z-index: 1001;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .close-modal:hover {
+            background: white;
+            color: black;
+            transform: rotate(90deg) scale(1.1);
+        }
+
+        .modal-header-section {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 5rem;
+            margin-bottom: 6rem;
+            align-items: center;
+        }
+
+        @media (max-width: 1000px) {
+            .modal-header-section {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+        }
+
+        .modal-info h2 {
+            font-size: 5rem;
+            font-weight: 800;
+            letter-spacing: -3px;
+            margin-bottom: 2rem;
+            line-height: 1;
+        }
+
+        .modal-info .full-desc {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 3rem;
+            font-weight: 300;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 3rem;
+        }
+
+        .stack-item {
+            padding: 12px 24px;
+            background: rgba(var(--accent-rgb), 0.05);
+            border: 1px solid rgba(var(--accent-rgb), 0.2);
+            border-radius: 15px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--accent);
+            transition: all 0.3s ease;
+        }
+
+        .stack-item:hover {
+            background: rgba(var(--accent-rgb), 0.15);
+            transform: translateY(-5px);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .action-btn {
+            padding: 18px 40px;
+            border-radius: 50px;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #030514;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-visual-hero {
+            border-radius: 40px;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            background: #111;
+            border: 1px solid var(--glass-border);
+            position: relative;
+        }
+
+        .modal-visual-hero img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Live Preview Window */
+        .preview-window {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background: black;
+            display: none;
+            opacity: 0;
+            flex-direction: column;
+        }
+
+        .preview-nav {
+            padding: 1rem 2rem;
+            background: #0a0a0a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #222;
+        }
+
+        .preview-nav .url-bar {
+            background: #222;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #888;
+            flex: 0.6;
+            text-align: center;
+        }
+
+        .close-preview {
+            color: white;
+            font-size: 1.2rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .close-preview:hover {
+            background: #333;
+        }
+
+        .preview-viewport {
+            flex: 1;
+            border: none;
+            background: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="custom-cursor"></div>
+    <div class="cursor-outer" id="cursor-outer">
+        <span class="cursor-text" id="cursor-text">View Detail</span>
+    </div>
+
+    <div class="cosmic-bg">
+        <div class="nebula" style="top: -10%; left: -10%;"></div>
+        <div class="nebula"
+            style="bottom: -20%; right: -10%; opacity: 0.05; background: radial-gradient(circle, #7f5cff 0%, transparent 70%);">
+        </div>
+    </div>
+
+    <nav>
+        <div class="logo">DS_66</div>
+        <a href="ds_portfolio.html" class="back-link">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Return to Core</span>
+        </a>
+    </nav>
+
+    <header>
+        <div class="persona-badge" id="projectCountBadge">The Arsenal // Load...</div>
+        <h1>Modern <br>Full Stack.</h1>
+        <p class="header-desc">Explore a curated collection of AI solutions, campus infrastructure, and specialized
+            software engineering projects.</p>
+    </header>
+
+    <div class="section-title">High Impact Systems</div>
+    <div class="project-grid" id="projectGrid">
+        <!-- Dynmically Rendered -->
+    </div>
+
+    <!-- Case Study Modal -->
+    <div class="modal" id="caseStudyModal">
+        <div class="close-modal" onclick="closeModal()">
+            <i class="fa-solid fa-xmark"></i>
+        </div>
+        <div class="modal-content" id="modalContent">
+            <!-- Content Injected -->
+        </div>
+    </div>
+
+    <!-- Live Preview -->
+    <div class="preview-window" id="previewWindow">
+        <div class="preview-nav">
+            <div class="url-bar" id="previewUrl">https://dinesh-surrya.projects.live</div>
+            <div class="close-preview" onclick="closePreview()"><i class="fa-solid fa-xmark"></i></div>
+        </div>
+        <iframe src="" class="preview-viewport" id="previewIframe"></iframe>
+    </div>
+
+    <script src="portfolio_content.js"></script>
+    <script>
+        // --- SELF-CONTAINED DATA INJECTION ---
+        // This ensures the page renders even if portfolio_content.js fails to load
+        let projectData = {};
+
+        try {
+            // Check if PORTFOLIO_CONTENT exists (from external script)
+            if (typeof PORTFOLIO_CONTENT !== 'undefined' && PORTFOLIO_CONTENT.projectsData) {
+                projectData = PORTFOLIO_CONTENT.projectsData;
+            } else {
+                throw new Error("External content not ready");
+            }
+        } catch (e) {
+            console.warn("Using fallback internal project data:", e.message);
+            // Full fallback mapping to your projects in portfolio_content.js
+            projectData = {
+                'smartcampus': {
+                    title: 'Smart Campus',
+                    tag: 'Academic Management',
+                    desc: 'Centralized platform for timetables, course mapping, and placements at KIT, built with MERN stack.'
+                },
+                'datagenius': {
+                    title: 'DataGuardian AI',
+                    tag: 'AI-Powered Quality',
+                    desc: 'Full-stack SaaS to clean, validate, and deduplicate B2B datasets using LLMs.'
+                },
+                'rag': {
+                    title: 'RAG-AI Chatbot',
+                    tag: 'Document Intelligence',
+                    desc: 'Retrieval-Augmented Generation system for querying unstructured PDF/DOCX files with vector search.'
+                },
+                'mentormentee': {
+                    title: 'Mentor–Mentee AI Portal',
+                    tag: 'Meeting Management',
+                    desc: 'Role-based mentoring platform for meetings and progress tracking with dynamic question chaining.'
+                },
+                'riskguardian': {
+                    title: 'RiskGuardian AI',
+                    tag: 'Supply Chain AI',
+                    desc: 'AI-driven supply chain risk detection and prioritization platform with event-based risk scoring.'
+                },
+                'ecomart': {
+                    title: 'EcoMart',
+                    tag: 'Smart Retail',
+                    desc: 'Smart retail inventory management system with eco-score gamification and analytics.'
+                },
+                'studenthub': {
+                    title: 'StudentHub',
+                    tag: 'Collaboration',
+                    desc: 'Centralized event and peer collaboration platform for students.'
+                },
+                'scraper': {
+                    title: 'Website Scraper',
+                    tag: 'Data Extraction',
+                    desc: 'Automated data extraction tool with structured output for downstream processing.'
+                },
+                'ytcaps': {
+                    title: 'YouTube Timestamp',
+                    tag: 'Chrome Extension',
+                    desc: 'Browser extension to capture and manage timestamps from YouTube videos.'
+                }
+            };
+        }
+
+        const grid = document.getElementById('projectGrid');
+        const modal = document.getElementById('caseStudyModal');
+        const modalContent = document.getElementById('modalContent');
+        const cursor = document.getElementById('custom-cursor');
+        const cursorOuter = document.getElementById('cursor-outer');
+        const cursorText = document.getElementById('cursor-text');
+
+        // Cinematic Video Placeholders - Expanded & More Vibrant
+        const videoLibrary = [
+            'https://assets.mixkit.co/videos/preview/mixkit-abstract-blue-and-purple-ink-flowing-in-water-43306-prime.mp4',
+            'https://assets.mixkit.co/videos/preview/mixkit-abstract-fast-particles-background-v2-42171-prime.mp4',
+            'https://assets.mixkit.co/videos/preview/mixkit-abstract-moving-lines-of-white-light-on-black-background-42139-prime.mp4',
+            'https://assets.mixkit.co/videos/preview/mixkit-abstract-tunnel-composed-of-small-points-42111-prime.mp4',
+            'https://assets.mixkit.co/videos/preview/mixkit-particles-in-slow-motion-against-a-black-background-42152-prime.mp4',
+            'https://assets.mixkit.co/videos/preview/mixkit-mysterious-blue-nebula-in-motion-42168-prime.mp4',
+            'https://assets.mixkit.co/videos/preview/mixkit-glowing-lines-on-a-black-background-43407-prime.mp4',
+            'https://assets.mixkit.co/videos/preview/mixkit-blue-and-white-abstract-geometric-shapes-43411-prime.mp4',
+            'https://assets.mixkit.co/videos/preview/mixkit-abstract-animation-of-blue-particles-43416-prime.mp4'
+        ];
+
+        // Aesthetic Image Placeholders - High Vibrancy
+        const imageLibrary = [
+            'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200',
+            'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200',
+            'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1200',
+            'https://images.unsplash.com/photo-1558494949-ef010cbdcc4b?auto=format&fit=crop&q=80&w=1200',
+            'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&q=80&w=1200',
+            'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&q=80&w=1200',
+            'https://images.unsplash.com/photo-1620712943543-bcc4628c6bb5?auto=format&fit=crop&q=80&w=1200',
+            'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&q=80&w=1200',
+            'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1200'
+        ];
+
+        function init() {
+            renderProjects();
+            setupCursor();
+            setupGSAP();
+
+            // Set Project Count
+            const count = Object.keys(projectData).length;
+            document.getElementById('projectCountBadge').innerText = `The Arsenal // ${count} PROJECT${count !== 1 ? 'S' : ''} DETECTED`;
+        }
+
+        function renderProjects() {
+            Object.keys(projectData).forEach((key, index) => {
+                const p = projectData[key];
+                const video = videoLibrary[index % videoLibrary.length];
+                const img = imageLibrary[index % imageLibrary.length];
+
+                const card = document.createElement('div');
+                card.className = 'project-card';
+                card.innerHTML = `
+                    <div class="card-media">
+                        <video loop muted playsinline>
+                            <source src="${video}" type="video/mp4">
+                        </video>
+                        <img src="${img}" alt="${p.title}">
+                    </div>
+                    <div class="card-content">
+                        <span class="card-tag">${p.tag}</span>
+                        <h3 class="card-title">${p.title}</h3>
+                        <p class="card-mini-desc">${p.desc.substring(0, 100)}...</p>
+                        <div class="view-case-btn">
+                            <i><i class="fa-solid fa-arrow-right"></i></i>
+                            <span>View Case Study</span>
+                        </div>
+                    </div>
+                `;
+
+                card.addEventListener('mouseenter', () => {
+                    const v = card.querySelector('video');
+                    v.play();
+                    cursorOuter.style.transform = 'translate(-50%, -50%) scale(2.5)';
+                    cursorOuter.style.background = 'white';
+                    cursorOuter.style.borderColor = 'white';
+                    cursorText.style.opacity = '1';
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    const v = card.querySelector('video');
+                    v.pause();
+                    cursorOuter.style.transform = 'translate(-50%, -50%) scale(1)';
+                    cursorOuter.style.background = 'transparent';
+                    cursorOuter.style.borderColor = 'rgba(255,255,255,0.3)';
+                    cursorText.style.opacity = '0';
+                });
+
+                card.addEventListener('click', () => openModal(key, img));
+
+                grid.appendChild(card);
+            });
+        }
+
+        function openModal(id, bgImg) {
+            const p = projectData[id];
+
+            // Logic to determine stack icons based on project keywords
+            let stackHtml = '';
+            if (p.desc.toLowerCase().includes('react')) stackHtml += `<div class="stack-item"><i class="fab fa-react"></i> React</div>`;
+            if (p.desc.toLowerCase().includes('node')) stackHtml += `<div class="stack-item"><i class="fab fa-node-js"></i> Node.js</div>`;
+            if (p.desc.toLowerCase().includes('ai') || p.desc.toLowerCase().includes('llm')) stackHtml += `<div class="stack-item"><i class="fas fa-brain"></i> OpenAI / RAG</div>`;
+            if (p.desc.toLowerCase().includes('mongo') || p.desc.toLowerCase().includes('postgres')) stackHtml += `<div class="stack-item"><i class="fas fa-database"></i> Database</div>`;
+            if (stackHtml === '') stackHtml = `<div class="stack-item">Full Stack Development</div><div class="stack-item">System Architecture</div>`;
+
+            modalContent.innerHTML = `
+                <div class="modal-header-section">
+                    <div class="modal-info">
+                        <div class="persona-badge">${p.tag}</div>
+                        <h2>${p.title}</h2>
+                        <p class="full-desc">${p.desc}</p>
+                        
+                        <div class="tech-stack">${stackHtml}</div>
+
+                        <div class="modal-actions">
+                            <a href="#" class="action-btn btn-primary" onclick="openPreview('https://github.com/DINESHSURRYA')">
+                                <i class="fa-solid fa-display"></i> Launch Preview
+                            </a>
+                            <a href="https://github.com/DINESHSURRYA" target="_blank" class="action-btn btn-secondary">
+                                <i class="fab fa-github"></i> Repository
+                            </a>
+                        </div>
+                    </div>
+                    <div class="modal-visual-hero">
+                        <img src="${bgImg}" alt="${p.title}">
+                    </div>
+                </div>
+                
+                <div style="margin-top: 4rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px;">
+                     <div style="height: 300px; border-radius: 30px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.1); font-size: 3rem;"><i class="fa-solid fa-code"></i></div>
+                     <div style="height: 300px; border-radius: 30px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.1); font-size: 3rem;"><i class="fa-solid fa-gears"></i></div>
+                     <div style="height: 300px; border-radius: 30px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.1); font-size: 3rem;"><i class="fa-solid fa-terminal"></i></div>
+                </div>
+            `;
+
+            modal.style.display = 'block';
+            gsap.to(modal, { opacity: 1, duration: 0.6, ease: "power4.out" });
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            gsap.to(modal, {
+                opacity: 0,
+                duration: 0.4,
+                onComplete: () => {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        }
+
+        function openPreview(url) {
+            const win = document.getElementById('previewWindow');
+            const iframe = document.getElementById('previewIframe');
+            iframe.src = "https://dineshurrya.github.io/portfolio/"; // Fallback to main for demo
+            win.style.display = 'flex';
+            gsap.to(win, { opacity: 1, y: 0, duration: 0.8, ease: "expo.out" });
+        }
+
+        function closePreview() {
+            const win = document.getElementById('previewWindow');
+            gsap.to(win, {
+                opacity: 0,
+                y: 100,
+                duration: 0.6,
+                onComplete: () => {
+                    win.style.display = 'none';
+                    document.getElementById('previewIframe').src = '';
+                }
+            });
+        }
+
+        function setupCursor() {
+            document.addEventListener('mousemove', (e) => {
+                gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1 });
+                gsap.to(cursorOuter, { x: e.clientX, y: e.clientY, duration: 0.3, ease: "power2.out" });
+            });
+        }
+
+        function setupGSAP() {
+            gsap.registerPlugin(ScrollTrigger);
+
+            gsap.from("header > *", {
+                y: 60,
+                opacity: 0,
+                duration: 1.2,
+                stagger: 0.2,
+                ease: "power4.out"
+            });
+
+            // Advanced Scroll Reveal: Boxes appear when scrolling down OR up
+            document.querySelectorAll('.project-card').forEach((card, i) => {
+                gsap.fromTo(card,
+                    {
+                        opacity: 0,
+                        y: 100,
+                        scale: 0.9
+                    },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        scale: 1,
+                        duration: 1,
+                        ease: "power3.out",
+                        scrollTrigger: {
+                            trigger: card,
+                            start: "top 90%", // Start when top of card is 90% down the screen
+                            end: "top 20%",   // End when it reaches the top 20%
+                            toggleActions: "play reverse play reverse", // Play when entering, reverse when exiting (up/down)
+                            // markers: false // Set to true for debugging
+                        }
+                    }
+                );
+            });
+        }
+
+        window.onload = init;
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dinesh Surrya | Cinematic Navigation</title>
+    <style>
+        :root {
+            --bg-deep: #020617;
+            --cyan-glow: #00e5ff;
+            --purple-glow: #7f5cff;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-deep);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        #app {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .blur-overlay {
+            position: fixed;
+            inset: 0;
+            backdrop-filter: blur(0px);
+            pointer-events: none;
+            z-index: 50;
+            transition: backdrop-filter 1.5s ease;
+        }
+
+        /* Orb Styling */
+        .orb {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15), transparent 70%);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease;
+        }
+
+        .orb-inner {
+            width: 85%;
+            height: 85%;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%);
+            opacity: 0.2;
+            filter: blur(8px);
+            transition: background 1s ease, opacity 1s ease;
+        }
+
+        /* Initial Positions */
+        #orb-left { left: 25%; transform: translateX(-50%); }
+        #orb-right { left: 75%; transform: translateX(-50%); }
+
+        /* Dialog Box */
+        #dialog {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -45%);
+            width: 450px;
+            padding: 40px;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            text-align: center;
+            color: white;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 100;
+            transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        #dialog.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%);
+        }
+
+        h2 { font-weight: 200; letter-spacing: 5px; margin-bottom: 20px; text-transform: uppercase; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .stat-item { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px; font-size: 0.8rem; color: #38bdf8; }
+
+        .btn-back {
+            background: transparent;
+            color: white;
+            border: 1px solid var(--border);
+            padding: 12px 40px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 10px;
+        }
+
+        .btn-back:hover { background: white; color: black; }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <div class="blur-overlay" id="blur"></div>
+        
+        <div id="orb-left" class="orb"><div class="orb-inner"></div></div>
+        <div id="orb-right" class="orb"><div class="orb-inner"></div></div>
+
+        <div id="dialog">
+            <h2>Dinesh Surrya G</h2>
+            <div class="stats-grid">
+                <div class="stat-item">TCS CodeVita: Rank 985</div>
+                <div class="stat-item">NPTEL Silver: DSA Java</div>
+                <div class="stat-item">Karpagam Institute</div>
+                <div class="stat-item">Full Stack Developer</div>
+            </div>
+            <button class="btn-back">Back to Core</button>
+        </div>
+    </div>
+
+    <script>
+        const states = { IDLE: 0, MOVING: 1, ACCELERATING: 2, SLOWING: 3, EXPANDING: 4, DIALOG: 5 };
+        let state = states.IDLE;
+        
+        const blur = document.getElementById('blur');
+        const dialog = document.getElementById('dialog');
+        const backBtn = document.querySelector('.btn-back');
+        const leftOrb = { el: document.getElementById('orb-left'), x: 25 };
+        const rightOrb = { el: document.getElementById('orb-right'), x: 75 };
+
+        let active = null;
+        let inactive = null;
+        let data = { x: 0, rot: 0, rotSpd: 0, scale: 1, opacity: 0.2 };
+
+        function lerp(a, b, n) { return (1 - n) * a + n * b; }
+
+        function loop(time) {
+            if (state === states.IDLE) {
+                // Idle slow rotation
+                leftOrb.el.style.transform = `translateX(-50%) rotate(${time * 0.02}deg) scale(1)`;
+                rightOrb.el.style.transform = `translateX(-50%) rotate(${time * 0.02}deg) scale(1)`;
+            } else {
+                data.rot += data.rotSpd;
+                active.el.style.left = `${data.x}%`;
+                active.el.style.transform = `translateX(-50%) rotate(${data.rot}deg) scale(${data.scale})`;
+                active.el.querySelector('.orb-inner').style.opacity = data.opacity;
+            }
+            requestAnimationFrame(loop);
+        }
+
+        function triggerSequence(side) {
+            if (state !== states.IDLE) return;
+            
+            active = side === 'left' ? leftOrb : rightOrb;
+            inactive = side === 'left' ? rightOrb : leftOrb;
+            state = states.MOVING;
+            
+            let start = performance.now();
+            inactive.el.style.opacity = '0';
+
+            function step(now) {
+                let elapsed = now - start;
+
+                if (state === states.MOVING) {
+                    let p = Math.min(elapsed / 1000, 1);
+                    data.x = lerp(active.x, 50, p);
+                    data.rotSpd = 0; // No spin while moving to center
+                    if (p === 1) { state = states.ACCELERATING; start = now; }
+                } 
+                else if (state === states.ACCELERATING) {
+                    let p = Math.min((now - start) / 1200, 1);
+                    data.rotSpd = lerp(0, 4, p); // 5-10% speed acceleration
+                    data.opacity = lerp(0.2, 0.8, p);
+                    active.el.style.boxShadow = `0 0 ${p * 50}px var(--cyan-glow)`;
+                    if (p === 1) { state = states.SLOWING; start = now; }
+                }
+                else if (state === states.SLOWING) {
+                    let p = Math.min((now - start) / 1000, 1);
+                    data.rotSpd = lerp(4, 0.5, p); // Slows back down
+                    active.el.querySelector('.orb-inner').style.background = `radial-gradient(circle, var(--purple-glow) 0%, transparent 70%)`;
+                    if (p === 1) { state = states.EXPANDING; start = now; }
+                }
+                else if (state === states.EXPANDING) {
+                    let p = Math.min((now - start) / 1500, 1);
+                    data.scale = lerp(1, 15, 1 - Math.pow(1 - p, 3));
+                    if (p > 0.5) blur.style.backdropFilter = 'blur(20px)';
+                    if (p === 1) { 
+                        state = states.DIALOG; 
+                        dialog.classList.add('active'); 
+                        data.scale = 2.5; // Final background size
+                    }
+                }
+
+                if (state !== states.IDLE && state !== states.DIALOG) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        }
+
+        backBtn.onclick = () => {
+            dialog.classList.remove('active');
+            blur.style.backdropFilter = 'blur(0px)';
+            
+            let start = performance.now();
+            let startX = data.x;
+            let startScale = data.scale;
+
+            function back(now) {
+                let p = Math.min((now - start) / 1000, 1);
+                data.x = lerp(startX, active.x, p);
+                data.scale = lerp(startScale, 1, p);
+                inactive.el.style.opacity = p;
+                
+                // Reset visuals
+                active.el.style.boxShadow = 'none';
+                active.el.querySelector('.orb-inner').style.background = `radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%)`;
+
+                if (p < 1) requestAnimationFrame(back);
+                else { state = states.IDLE; active = null; }
+            }
+            requestAnimationFrame(back);
+        };
+
+        leftOrb.el.onclick = () => triggerSequence('left');
+        rightOrb.el.onclick = () => triggerSequence('right');
+        requestAnimationFrame(loop);
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Immersive · Dinesh Surrya Portfolio</title>
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="portfolio_style.css">
+    <style>
+        /* -------------------------------
+           IMMERSIVE OVERRIDES
+        ------------------------------- */
+        :root {
+            --nebula-color: rgba(112, 214, 255, 0.1);
+        }
+
+        #bgCanvas {
+            filter: blur(2px);
+            opacity: 0.6;
+        }
+
+        .nebula-overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+                    var(--nebula-color) 0%,
+                    transparent 70%);
+            z-index: -1;
+            transition: background 1.2s ease;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+
+        .pearl-orb {
+            background: transparent !important;
+            backdrop-filter: none !important;
+            box-shadow: none !important;
+            border: none !important;
+            cursor: pointer;
+            overflow: visible;
+        }
+
+        /* Ensure Three.js canvas doesn't block events */
+        .pearl-orb canvas {
+            pointer-events: none;
+        }
+
+        .ping-flash {
+            position: fixed;
+            inset: 0;
+            background: white;
+            opacity: 0;
+            z-index: 2000;
+            pointer-events: none;
+        }
+
+        /* Enhanced Project Cards for Immersive */
+        .project-card {
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s ease;
+        }
+
+        .project-card:hover {
+            transform: scale(1.02) translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 3D Label Perspective */
+        .orb-label {
+            perspective: 1000px;
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 4px;
+        }
+
+        .split-orb-wrapper.near .orb-label {
+            text-shadow: 0 0 20px var(--nebula-color);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ping-flash" id="pingFlash"></div>
+    <div class="nebula-overlay" id="nebulaOverlay"></div>
+
+    <div id="ds-cursor">
+        <div class="sharp-point"></div>
+        <div class="ds-text">DS</div>
+    </div>
+
+    <div class="audio-toggle" id="audioToggle" title="Mute/Unmute Atmosphere">
+        <svg viewBox="0 0 24 24" id="audioIcon" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+        </svg>
+    </div>
+
+    <div class="space-container">
+        <div class="light-ray top-left" id="ray1"></div>
+        <div class="light-ray bottom-right" id="ray2"></div>
+    </div>
+    <div class="bg-watermark">DS_66</div>
+
+    <canvas id="bgCanvas" class="bg-canvas"></canvas>
+    <canvas id="celebrationCanvas" class="celebration-canvas"></canvas>
+    <div id="lightWash" class="light-wash"></div>
+
+    <!-- BENTO HUB -->
+    <div class="bento-hub" id="bentoHub">
+        <div class="tile-profile bento-tile" onclick="openCapsule('profile')"
+            onmouseenter="shiftNebula('rgba(255,255,255,0.15)')">
+            <div class="persona-badge" style="margin-bottom: 10px;">Legacy</div>
+            <div class="tile-title">Who I Am</div>
+            <div class="tile-desc">The Architect of this digital space.</div>
+        </div>
+        <div class="tile-projects bento-tile" onclick="openCapsule('projects')"
+            onmouseenter="shiftNebula('rgba(79, 255, 173, 0.25)')">
+            <div class="persona-badge" style="margin-bottom: 10px;">Creations</div>
+            <div class="tile-title">Selected Works</div>
+            <div class="tile-desc">Smart Campus, DataGuardian, RAG AI</div>
+        </div>
+        <div class="tile-skills bento-tile" onclick="openCapsule('skills')"
+            onmouseenter="shiftNebula('rgba(112, 214, 255, 0.25)')">
+            <div class="persona-badge" style="margin-bottom: 10px;">Arsenal</div>
+            <div class="tile-title">Tech Stack</div>
+            <div class="tile-desc">Full Stack · AI · Cloud</div>
+        </div>
+        <div class="tile-experience bento-tile" onclick="openCapsule('experience')"
+            onmouseenter="shiftNebula('rgba(127, 92, 255, 0.25)')">
+            <div class="persona-badge" style="margin-bottom: 10px;">Timeline</div>
+            <div class="tile-title">The Journey</div>
+            <div class="tile-desc">Navigating the digital deep since 2022.</div>
+        </div>
+        <div class="tile-contact bento-tile" onclick="openCapsule('contact')"
+            onmouseenter="shiftNebula('rgba(255, 112, 169, 0.25)')">
+            <div class="persona-badge" style="margin-bottom: 10px;">Link</div>
+            <div class="tile-title">Synchronize</div>
+            <div class="tile-desc">Available for innovative collaborations.</div>
+        </div>
+        <div class="tile-achievements bento-tile" onclick="openCapsule('achievements')"
+            onmouseenter="shiftNebula('rgba(255, 215, 0, 0.25)')">
+            <div class="persona-badge" style="margin-bottom: 10px;">Performance</div>
+            <div class="tile-title">Achievements</div>
+            <div class="tile-desc">CodeVita Rank 985, LeetCode 365.</div>
+        </div>
+    </div>
+
+    <div class="close-hub" id="closeHub" onclick="exitHub()">Exit Hub // Back to Core</div>
+
+    <div class="guidance-wrapper" id="guidanceWrapper">
+        <div class="assistant-orb"></div>
+        <div class="guidance-text" id="guidanceText">The Koi awaits your arrival</div>
+    </div>
+
+    <div class="orb-container" id="mainContainer">
+        <div class="center-logo" id="centerLogo">
+            <div class="logo-text">DS_66</div>
+        </div>
+
+        <!-- MAIN THREE.JS ORB -->
+        <div class="pearl-orb" id="mainOrb"></div>
+
+        <div class="split-orb-wrapper left" id="leftWrapper">
+            <div class="split-orb" id="leftOrb">
+                <div class="image-container">
+                    <img src="image.png" class="rotating-image" alt="DS Profile">
+                </div>
+            </div>
+            <span class="orb-label">who is DS?</span>
+        </div>
+
+        <div class="split-orb-wrapper right" id="rightWrapper">
+            <div class="split-orb" id="rightOrb">
+                <div class="image-container">
+                    <img src="image.png" class="rotating-image" alt="DS Persona">
+                </div>
+            </div>
+            <span class="orb-label">he is DS!!!</span>
+        </div>
+    </div>
+
+    <!-- INTERACTIVE CONTENT OVERLAY -->
+    <div class="intro-overlay" id="introOverlay">
+        <div class="intro-card" id="introCard">
+            <div class="persona-badge" id="personaBadge">Persona</div>
+            <img src="ds.jpeg" class="reveal-photo" id="dsRevealPhoto" alt="Dinesh Surrya">
+            <h1 id="overlayTitle">Hi,</h1>
+            <h2 id="overlaySubtitle">I’m Dinesh Surrya.</h2>
+            <div id="overlayContent"></div>
+            <div class="card-footer" style="display: flex; gap: 15px; margin-top: 30px; justify-content: center;">
+                <button class="explore-btn" id="exploreHubBtn">Explore Hub</button>
+                <button class="explore-btn"
+                    style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);"
+                    id="backToCoreBtn">Back to Core</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="capsule-overlay" id="capsuleOverlay">
+        <div class="close-hub" style="top: 40px; right: 40px;" onclick="closeCapsule()">Close Section // Return to Hub
+        </div>
+        <div class="capsule-content" id="capsuleContent"></div>
+    </div>
+
+    <script src="portfolio_content.js"></script>
+    <script>
+        // --- 1. CORE VARIABLES ---
+        const APP_STATES = { IDLE: 'IDLE', EXPANDING: 'EXPANDING', CONTENT: 'CONTENT', HUB: 'HUB', TRANSITION: 'TRANSITION' };
+        const ORB_STATES = { IDLE: 'IDLE', CENTERING: 'CENTERING', CHARGING: 'CHARGING', STABILIZING: 'STABILIZING', PORTAL_EXPANSION: 'PORTAL_EXPANSION', STABLE: 'STABLE' };
+
+        let appState = APP_STATES.IDLE;
+        let currentOrbState = ORB_STATES.IDLE;
+        let activeExpandOrb = null;
+        let mousePosition = { x: 0, y: 0 };
+        let lastX = 0, lastY = 0;
+
+        const phrases = ["The Koi awaits your arrival", "Move closer to unveil the mystery", "A dual nature resides within", "Click the core to begin your journey"];
+        let currentPhrase = 0;
+
+        // --- 2. AUDIO ENGINE (REACTIVE SFX & PROXIMITY HUM) ---
+        let audioCtx, cosmicHum, humGain;
+        let isMuted = true;
+
+        function initAudio() {
+            if (audioCtx) return;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            cosmicHum = audioCtx.createOscillator();
+            cosmicHum.type = 'sine';
+            cosmicHum.frequency.setValueAtTime(55, audioCtx.currentTime);
+            humGain = audioCtx.createGain();
+            humGain.gain.setValueAtTime(0, audioCtx.currentTime);
+            cosmicHum.connect(humGain);
+            humGain.connect(audioCtx.destination);
+            cosmicHum.start();
+        }
+
+        function playSFX(type) {
+            if (isMuted || !audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.connect(g);
+            g.connect(audioCtx.destination);
+
+            if (type === 'ping') {
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.5);
+                g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+            } else if (type === 'whoosh') {
+                osc.frequency.setValueAtTime(110, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.3);
+                g.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+            }
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
+        }
+
+        // --- 3. THREE.JS ORB SYSTEM ---
+        let scene, camera, renderer, orbGroup, koiGroup, crystalOrb;
+        const mainOrbEl = document.getElementById('mainOrb');
+
+        function initThreeOrb() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+            camera.position.z = 4.5;
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            const size = mainOrbEl.offsetWidth || 400;
+            renderer.setSize(size, size);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            mainOrbEl.appendChild(renderer.domElement);
+
+            const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+            scene.add(ambient);
+            const point = new THREE.PointLight(0x70d6ff, 10);
+            point.position.set(2, 2, 4);
+            scene.add(point);
+
+            orbGroup = new THREE.Group();
+            scene.add(orbGroup);
+
+            // Refractive Glass Sphere
+            const geo = new THREE.SphereGeometry(1.5, 64, 64);
+            const mat = new THREE.MeshPhysicalMaterial({
+                transmission: 0.95,
+                thickness: 2.0,
+                roughness: 0.05,
+                ior: 1.5,
+                clearcoat: 1.0,
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.9,
+                envMapIntensity: 1.5
+            });
+            crystalOrb = new THREE.Mesh(geo, mat);
+            orbGroup.add(crystalOrb);
+
+            // "Koi" geometric shards
+            koiGroup = new THREE.Group();
+            orbGroup.add(koiGroup);
+            const shardMat = new THREE.MeshPhongMaterial({ color: 0xff4d6d, emissive: 0xff4d6d, emissiveIntensity: 1, transparent: true, opacity: 0.8 });
+            for (let i = 0; i < 6; i++) {
+                const shard = new THREE.Mesh(new THREE.IcosahedronGeometry(0.12, 0), shardMat.clone());
+                shard.userData.orbit = (i / 6) * Math.PI * 2;
+                shard.userData.speed = 0.01 + Math.random() * 0.01;
+                shard.userData.vSpeed = 0.005 + Math.random() * 0.01;
+                koiGroup.add(shard);
+            }
+
+            animateThree();
+        }
+
+        function animateThree() {
+            requestAnimationFrame(animateThree);
+            const time = Date.now() * 0.001;
+
+            orbGroup.rotation.y += 0.003;
+            orbGroup.position.y = Math.sin(time * 0.5) * 0.1;
+
+            koiGroup.children.forEach((shard, i) => {
+                shard.userData.orbit += shard.userData.speed;
+                shard.position.x = Math.cos(shard.userData.orbit) * 0.9;
+                shard.position.z = Math.sin(shard.userData.orbit) * 1.1;
+                shard.position.y = Math.sin(shard.userData.orbit * 2) * 0.5;
+                shard.rotation.x += 0.02;
+                shard.rotation.y += 0.03;
+                shard.material.color.setHSL((time * 0.05 + i * 0.1) % 1, 0.8, 0.5);
+                shard.material.emissive.setHSL((time * 0.05 + i * 0.1) % 1, 0.8, 0.5);
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        // --- 4. SNOWFALL & NEBULA BACKGROUND ---
+        const bgCanvas = document.getElementById('bgCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        let snowParticles = [];
+
+        class Snow {
+            constructor() { this.init(); this.y = Math.random() * bgCanvas.height; }
+            init() {
+                this.x = Math.random() * bgCanvas.width;
+                this.y = -20;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.speedY = 0.5 + Math.random() * 1.5;
+                this.speedX = -0.5 + Math.random() * 1.0;
+                this.opacity = 0.2 + Math.random() * 0.5;
+            }
+            update() {
+                this.y += this.speedY; this.x += this.speedX;
+                if (this.y > bgCanvas.height) this.init();
+            }
+            draw() {
+                bgCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                bgCtx.beginPath(); bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2); bgCtx.fill();
+            }
+        }
+
+        function initBackground() {
+            bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight;
+            snowParticles = [];
+            for (let i = 0; i < 150; i++) snowParticles.push(new Snow());
+        }
+
+        function drawBackground() {
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            // Nebula Dust Layer
+            bgCtx.save();
+            bgCtx.globalCompositeOperation = 'screen';
+            const time = Date.now() * 0.0002;
+            const nebulaColor = getComputedStyle(document.body).getPropertyValue('--nebula-color');
+            const grad = bgCtx.createRadialGradient(
+                bgCanvas.width / 2 + Math.cos(time) * 200, bgCanvas.height / 2 + Math.sin(time * 0.8) * 200, 0,
+                bgCanvas.width / 2, bgCanvas.height / 2, bgCanvas.width * 0.8
+            );
+            grad.addColorStop(0, nebulaColor);
+            grad.addColorStop(1, 'transparent');
+            bgCtx.fillStyle = grad;
+            bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+            bgCtx.restore();
+
+            snowParticles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(drawBackground);
+        }
+
+        // --- 5. STATE MACHINE LOGIC ---
+        function navigateTo(state, params = {}) {
+            if (appState === APP_STATES.TRANSITION) return;
+            const prevState = appState;
+            appState = APP_STATES.TRANSITION;
+
+            if (state === APP_STATES.IDLE) {
+                navigateBackToCore();
+            } else if (state === APP_STATES.HUB) {
+                enterHub();
+            } else if (state === APP_STATES.CONTENT) {
+                openSelectedOrb(params.type);
+            }
+        }
+
+        function startExpansionSequence(type, el) {
+            if (currentOrbState !== ORB_STATES.IDLE) return;
+            initAudio();
+            playSFX('ping');
+
+            // Visual feedback flash
+            gsap.to('#pingFlash', { opacity: 0.1, duration: 0.2, yoyo: true, repeat: 1 });
+
+            if (type === 'main') {
+                el.classList.add('charging');
+                gsap.to(orbGroup.scale, { x: 1.2, y: 1.2, z: 1.2, duration: 1, repeat: -1, yoyo: true });
+
+                setTimeout(() => {
+                    playSFX('whoosh');
+                    el.classList.add('expanded');
+                    document.getElementById('lightWash').classList.add('active');
+
+                    setTimeout(() => {
+                        el.classList.add('hidden');
+                        document.getElementById('leftWrapper').classList.add('active');
+                        document.getElementById('rightWrapper').classList.add('active');
+                        document.getElementById('centerLogo').classList.add('visible');
+                        document.getElementById('lightWash').classList.remove('active');
+                        appState = APP_STATES.IDLE;
+                    }, 1000);
+                }, 1500);
+            } else {
+                // Split orb expansion logic here...
+                activeExpandOrb = type;
+                currentOrbState = ORB_STATES.CENTERING;
+                expandSplitOrb(type);
+            }
+        }
+
+        function expandSplitOrb(type) {
+            const wrapper = type === 'left' ? document.getElementById('leftWrapper') : document.getElementById('rightWrapper');
+            const other = type === 'left' ? document.getElementById('rightWrapper') : document.getElementById('leftWrapper');
+
+            gsap.to(other, { opacity: 0, duration: 0.5 });
+            gsap.to('#centerLogo', { opacity: 0, duration: 0.5 });
+            gsap.to('#guidanceWrapper', { opacity: 0, duration: 0.5 });
+
+            gsap.to(wrapper, {
+                left: '50%', right: 'auto', x: '-50%', scale: 1.2, duration: 0.8, ease: "expo.out",
+                onComplete: () => {
+                    currentOrbState = ORB_STATES.STABLE;
+                    appState = APP_STATES.CONTENT;
+                    openSelectedOrb(type);
+                }
+            });
+        }
+
+        function navigateBackToCore() {
+            playSFX('whoosh');
+            const wrapper = activeExpandOrb === 'left' ? document.getElementById('leftWrapper') : document.getElementById('rightWrapper');
+            const other = activeExpandOrb === 'left' ? document.getElementById('rightWrapper') : document.getElementById('leftWrapper');
+
+            document.getElementById('introOverlay').classList.remove('active');
+
+            gsap.to(wrapper, {
+                left: activeExpandOrb === 'left' ? '15%' : '85%',
+                x: activeExpandOrb === 'left' ? '0' : '-100%',
+                scale: 1, duration: 0.8, ease: "power3.inOut"
+            });
+            gsap.to([other, '#centerLogo', '#guidanceWrapper'], { opacity: 1, duration: 0.8 });
+
+            setTimeout(() => {
+                appState = APP_STATES.IDLE;
+                currentOrbState = ORB_STATES.IDLE;
+                activeExpandOrb = null;
+            }, 800);
+        }
+
+        function openSelectedOrb(type) {
+            const overlay = document.getElementById('introOverlay');
+            const photo = document.getElementById('dsRevealPhoto');
+            const badge = document.getElementById('personaBadge');
+            const title = document.getElementById('overlayTitle');
+            const subtitle = document.getElementById('overlaySubtitle');
+            const content = document.getElementById('overlayContent');
+
+            if (type === 'left') {
+                photo.style.display = 'none';
+                badge.innerText = "The Architect";
+                title.innerText = "About Me";
+                subtitle.innerText = "who is DS?";
+                content.innerHTML = `<div class="content-box"><p>I am a developer driven by curiosity and the desire to build impactful solutions. I specialize in crafting seamless user experiences with modern web technologies.</p></div>`;
+            } else {
+                photo.style.display = 'block';
+                badge.innerText = "The Visionary";
+                title.innerText = "Persona";
+                subtitle.innerText = "he is DS!!!";
+                content.innerHTML = `<div class="dual-box-container"><div class="content-box"><div class="box-tag">Core Persona</div><p>Dinesh Surrya (DS) is a problem solver, a creative thinker, and a disciplined learner.</p></div></div>`;
+            }
+
+            overlay.classList.add('active');
+            triggerCelebration();
+        }
+
+        function enterHub() {
+            playSFX('whoosh');
+            document.body.classList.add('active-hub');
+            document.getElementById('mainContainer').style.display = 'none';
+            document.getElementById('bentoHub').classList.add('active');
+            document.getElementById('closeHub').style.display = 'block';
+            appState = APP_STATES.HUB;
+        }
+
+        function exitHub() {
+            playSFX('ping');
+            document.body.classList.remove('active-hub');
+            document.getElementById('bentoHub').classList.remove('active');
+            document.getElementById('closeHub').style.display = 'none';
+            document.getElementById('mainContainer').style.display = 'flex';
+            navigateBackToCore();
+        }
+
+        function shiftNebula(color) {
+            document.body.style.setProperty('--nebula-color', color);
+            playSFX('whoosh');
+        }
+
+        // --- 6. INTERACTION BINDINGS ---
+        document.addEventListener('mousemove', (e) => {
+            mousePosition.x = e.clientX; mousePosition.y = e.clientY;
+            document.body.style.setProperty('--mouse-x', `${(e.clientX / window.innerWidth) * 100}%`);
+            document.body.style.setProperty('--mouse-y', `${(e.clientY / window.innerHeight) * 100}%`);
+
+            // Proximity Audio
+            if (audioCtx && appState === APP_STATES.IDLE && !document.getElementById('mainOrb').classList.contains('hidden')) {
+                const rect = mainOrbEl.getBoundingClientRect();
+                const dist = Math.sqrt(Math.pow(e.clientX - (rect.left + rect.width / 2), 2) + Math.pow(e.clientY - (rect.top + rect.height / 2), 2));
+                const freq = 55 + (Math.max(0, 500 - dist) / 500) * 110;
+                cosmicHum.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.1);
+                const vol = 0.02 + (Math.max(0, 400 - dist) / 400) * 0.08;
+                humGain.gain.setTargetAtTime(isMuted ? 0 : vol, audioCtx.currentTime, 0.1);
+            }
+        });
+
+        document.getElementById('mainOrb').addEventListener('click', () => startExpansionSequence('main', document.getElementById('mainOrb')));
+        document.getElementById('leftWrapper').addEventListener('click', () => startExpansionSequence('left', document.getElementById('leftOrb')));
+        document.getElementById('rightWrapper').addEventListener('click', () => startExpansionSequence('right', document.getElementById('rightOrb')));
+        document.getElementById('audioToggle').addEventListener('click', () => {
+            initAudio();
+            isMuted = !isMuted;
+            playSFX('ping');
+            document.getElementById('audioIcon').innerHTML = isMuted ?
+                '<path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line>' :
+                '<path d="M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>';
+        });
+
+        document.getElementById('exploreHubBtn').addEventListener('click', () => navigateTo(APP_STATES.HUB));
+        document.getElementById('backToCoreBtn').addEventListener('click', () => navigateTo(APP_STATES.IDLE));
+
+        // --- 7. CURSOR & INTERACTION UTILS ---
+        function createSparkle() {
+            if (!window.matchMedia("(pointer: fine)").matches) return;
+            const dsCursor = document.getElementById('ds-cursor');
+            const dsTextEl = dsCursor.querySelector('.ds-text');
+            const rect = dsTextEl.getBoundingClientRect();
+
+            const sparkle = document.createElement('div');
+            sparkle.className = 'ds-trail';
+            sparkle.innerText = 'DS';
+            sparkle.style.left = (rect.left + rect.width / 2 + (Math.random() - 0.5) * 10) + 'px';
+            sparkle.style.top = (rect.top + rect.height / 2 + (Math.random() - 0.5) * 10) + 'px';
+
+            const colors = ['#ff4d6d', '#ffd700', '#ffffff'];
+            sparkle.style.color = colors[Math.floor(Math.random() * colors.length)];
+            sparkle.style.textShadow = `0 0 8px ${sparkle.style.color}`;
+            document.body.appendChild(sparkle);
+            setTimeout(() => sparkle.remove(), 700);
+
+            if (!isMuted && audioCtx) playSFX('whoosh');
+        }
+
+        function addCursorHover() {
+            const targets = document.querySelectorAll('.pearl-orb, .split-orb, .bento-tile, .explore-btn, .close-hub, .audio-toggle, .project-card, .contact-btn');
+            const dsCursor = document.getElementById('ds-cursor');
+            targets.forEach(t => {
+                t.addEventListener('mouseenter', () => dsCursor.classList.add('hover'));
+                t.addEventListener('mouseleave', () => dsCursor.classList.remove('hover'));
+                t.addEventListener('mousedown', () => {
+                    for (let i = 0; i < 8; i++) setTimeout(() => createSparkle(), i * 50);
+                });
+            });
+        }
+
+        const openCapsule = (section) => {
+            playSFX('ping');
+            const content = PORTFOLIO_CONTENT.sections[section];
+            if (!content) return;
+            document.getElementById('capsuleContent').innerHTML = content;
+            document.getElementById('capsuleOverlay').classList.add('active');
+            addCursorHover();
+        };
+
+        const closeCapsule = () => { playSFX('whoosh'); document.getElementById('capsuleOverlay').classList.remove('active'); };
+
+        function triggerCelebration() {
+            const canvas = document.getElementById('celebrationCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            let parts = [];
+            for (let i = 0; i < 50; i++) parts.push({ x: Math.random() * canvas.width, y: canvas.height, s: Math.random() * 3 + 1, v: Math.random() * -5 - 2, o: 1 });
+            function anim() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                parts.forEach(p => { p.y += p.v; p.o -= 0.01; ctx.globalAlpha = p.o; ctx.fillStyle = '#70d6ff'; ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI * 2); ctx.fill(); });
+                if (parts.length > 0 && parts[0].o > 0) requestAnimationFrame(anim);
+            }
+            anim();
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            initThreeOrb();
+            initBackground();
+            drawBackground();
+            addCursorHover();
+
+            // Cursor Movement Logic
+            const dsCursor = document.getElementById('ds-cursor');
+            let cursorRotation = 0;
+            let lastX = 0;
+            let lastY = 0;
+            document.addEventListener('mousemove', (e) => {
+                dsCursor.style.left = e.clientX + 'px';
+                dsCursor.style.top = e.clientY + 'px';
+
+                const dx = e.clientX - lastX;
+                const dist = Math.hypot(dx, e.clientY - lastY);
+                if (dist > 2) {
+                    const targetRotation = Math.min(Math.max(dx * 0.5, -15), 15);
+                    cursorRotation += (targetRotation - cursorRotation) * 0.1;
+                    const baseScale = dsCursor.classList.contains('hover') ? 1.2 : 1.0;
+                    dsCursor.style.transform = `rotate(${cursorRotation}deg) scale(${baseScale})`;
+                }
+                if (dist > 15) {
+                    createSparkle();
+                    lastX = e.clientX;
+                    lastY = e.clientY;
+                }
+            });
+
+            // Phrase rotation
+            setInterval(() => {
+                if (appState === APP_STATES.IDLE) {
+                    currentPhrase = (currentPhrase + 1) % phrases.length;
+                    document.getElementById('guidanceText').innerText = phrases[currentPhrase];
+                }
+            }, 4000);
+        });
+
+        window.addEventListener('resize', () => {
+            initBackground();
+            if (renderer) {
+                const size = mainOrbEl.offsetWidth || 400;
+                renderer.setSize(size, size);
+                camera.aspect = 1;
+                camera.updateProjectionMatrix();
+            }
+        });
+    </script>
+</body>
+
+</html>

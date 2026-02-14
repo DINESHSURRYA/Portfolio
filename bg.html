@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinematic Space | Digital Snowfall</title>
+    <style>
+        :root {
+            --bg-dark: #020617;
+            --neon-blue: #00e5ff;
+            --neon-purple: #7f5cff;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-dark);
+        }
+
+        /* 1. Cinematic Gradient Base */
+        .space-container {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, #050b1f 0%, #020617 100%);
+            z-index: -1;
+        }
+
+        /* 2. Volumetric Light Rays */
+        .light-ray {
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            filter: blur(150px);
+            opacity: 0.12;
+            pointer-events: none;
+        }
+        .top-left { top: -300px; left: -300px; background: var(--neon-blue); }
+        .bottom-right { bottom: -300px; right: -300px; background: var(--neon-purple); }
+
+        /* 3. Drifting Asteroids */
+        .asteroid {
+            position: absolute;
+            background: #1e293b;
+            border-radius: 40% 60% 70% 30% / 40% 40% 60% 60%;
+            box-shadow: inset -10px -10px 20px rgba(0,0,0,0.8);
+            opacity: 0.4;
+            filter: blur(1px);
+            animation: drift var(--d) linear infinite;
+        }
+
+        @keyframes drift {
+            from { transform: translate(110vw, var(--y)) rotate(0deg); }
+            to { transform: translate(-20vw, calc(var(--y) + 150px)) rotate(360deg); }
+        }
+
+        /* 4. Neon Laser Beams */
+        .laser {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--color), transparent);
+            width: 400px;
+            opacity: 0.2;
+            animation: laser-pass 6s linear infinite;
+            filter: drop-shadow(0 0 8px var(--color));
+        }
+
+        @keyframes laser-pass {
+            0% { transform: translate(-500px, var(--y)) rotate(-15deg); opacity: 0; }
+            50% { opacity: 0.4; }
+            100% { transform: translate(120vw, calc(var(--y) + 300px)) rotate(-15deg); opacity: 0; }
+        }
+
+        #stardustCanvas {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="space-container">
+        <div class="light-ray top-left"></div>
+        <div class="light-ray bottom-right"></div>
+        
+        <div class="asteroid" style="--d: 50s; --y: 15vh; width: 100px; height: 70px;"></div>
+        <div class="asteroid" style="--d: 80s; --y: 65vh; width: 50px; height: 45px;"></div>
+        
+        <div class="laser" style="--y: 25vh; --color: var(--neon-blue); animation-delay: 0s;"></div>
+        <div class="laser" style="--y: 75vh; --color: var(--neon-purple); animation-delay: 3s;"></div>
+    </div>
+
+    <canvas id="stardustCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('stardustCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let particles = [];
+        let settledParticles = []; // To store the 'snow' on land
+        const maxSettled = 1000;
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            // Clear settled particles on resize to prevent layout breaking
+            settledParticles = [];
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.init();
+            }
+            init() {
+                this.x = Math.random() * canvas.width * 1.2;
+                this.y = Math.random() * -canvas.height;
+                this.size = Math.random() * 1.8 + 0.2;
+                this.speedX = -0.5 - Math.random() * 1; 
+                this.speedY = 1 + Math.random() * 1.5;
+                this.opacity = Math.random() * 0.6 + 0.2;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                // Check if it hits the "land" (bottom of screen)
+                if (this.y >= canvas.height - 2) {
+                    if (settledParticles.length < maxSettled) {
+                        settledParticles.push({
+                            x: this.x,
+                            y: canvas.height - Math.random() * 5, // Slight variance in height
+                            size: this.size,
+                            opacity: this.opacity * 0.8
+                        });
+                    }
+                    this.init(); // Respawn a new falling particle
+                }
+                
+                // Respawn if it goes off screen left
+                if (this.x < -10) this.init();
+            }
+            draw() {
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Initialize falling particles
+        for (let i = 0; i < 200; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate() {
+            // Draw dark background to clear frame
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw falling stardust
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            // Draw settled 'land' particles
+            settledParticles.forEach(p => {
+                ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Add a soft floor glow
+            const gradient = ctx.createLinearGradient(0, canvas.height - 50, 0, canvas.height);
+            gradient.addColorStop(0, 'rgba(0, 229, 255, 0)');
+            gradient.addColorStop(1, 'rgba(0, 229, 255, 0.05)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>

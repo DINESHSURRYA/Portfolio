@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DS Refined Cursor</title>
+    <style>
+        :root {
+            --ds-glow: #00f2ff;
+            --ds-sharp: #ffffff;
+        }
+
+        body {
+            background: #020005;
+            height: 100vh;
+            margin: 0;
+            cursor: none;
+            overflow: hidden;
+        }
+
+        /* The Main Cursor Container */
+        #ds-cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+            z-index: 999999;
+            transform: translate(-50%, -50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* The Arrow/Pointer - Keeping this sharp and original size */
+        .sharp-point {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 16px solid white;
+            transform: rotate(-45deg);
+            filter: drop-shadow(0 0 5px var(--ds-glow));
+            z-index: 2;
+        }
+
+        /* The "DS" Text - Reduced Size */
+        .ds-text {
+            font-family: 'Arial Black', sans-serif;
+            font-size: 14px; /* Reduced from 18px/28px */
+            font-weight: 900;
+            color: var(--ds-sharp);
+            animation: ds-pump 0.6s infinite cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            filter: drop-shadow(0 0 5px var(--ds-glow));
+            letter-spacing: -1px;
+            margin-left: 10px; /* Offset from the sharp point */
+            margin-top: 10px;
+        }
+
+        @keyframes ds-pump {
+            0%, 100% { transform: scale(1); filter: hue-rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.2); filter: hue-rotate(180deg); opacity: 0.8; }
+        }
+
+        /* Refined Small Trail Particles */
+        .ds-trail {
+            position: fixed;
+            pointer-events: none;
+            font-family: 'Arial Black', sans-serif;
+            font-weight: 900;
+            z-index: 999998;
+            animation: trail-ultra 0.5s forwards linear;
+        }
+
+        @keyframes trail-ultra {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(0.2) rotate(90deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ds-cursor">
+        <div class="sharp-point"></div>
+        <div class="ds-text">DS</div>
+    </div>
+
+    <script>
+        const cursor = document.getElementById('ds-cursor');
+        let lastX = 0;
+        let lastY = 0;
+        let hue = 0;
+
+        window.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+
+            const dist = Math.hypot(e.clientX - lastX, e.clientY - lastY);
+            
+            // Generate smaller sparkles
+            if (dist > 20) {
+                createSparkle(e.clientX, e.clientY);
+                lastX = e.clientX;
+                lastY = e.clientY;
+            }
+        });
+
+        function createSparkle(x, y) {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'ds-trail';
+            sparkle.innerText = 'DS';
+            
+            hue = (hue + 25) % 360;
+            const color = `hsl(${hue}, 100%, 75%)`;
+            
+            sparkle.style.left = x + 'px';
+            sparkle.style.top = y + 'px';
+            sparkle.style.color = color;
+            sparkle.style.fontSize = '10px'; // Very small trail text
+            sparkle.style.textShadow = `0 0 5px ${color}`;
+
+            document.body.appendChild(sparkle);
+
+            setTimeout(() => {
+                sparkle.remove();
+            }, 500);
+        }
+
+        // Handle Click "Nova"
+        window.addEventListener('mousedown', () => {
+            cursor.style.transform = 'translate(-50%, -50%) scale(0.8)';
+        });
+
+        window.addEventListener('mouseup', () => {
+            cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+        });
+    </script>
+</body>
+</html>

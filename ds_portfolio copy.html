@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Pisces · Dinesh Surrya Portfolio</title>
+    <link rel="stylesheet" href="portfolio_style.css">
+    <script src="portfolio_content.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Project Arsenal Grid System (Internal to ensure visibility) */
+        .project-arsenal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 25px;
+            margin-top: 3rem;
+            padding-bottom: 5rem;
+        }
+
+        @media (max-width: 768px) {
+            .project-arsenal-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .arsenal-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            height: 480px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        .arsenal-card:hover {
+            border-color: #70d6ff;
+            box-shadow: 0 0 50px rgba(112, 214, 255, 0.3);
+            transform: translateY(-15px);
+        }
+
+        .arsenal-card-media {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background: #111;
+        }
+
+        .arsenal-card-media video,
+        .arsenal-card-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 1 !important;
+            transition: all 1s ease;
+            filter: contrast(1.1) brightness(1.2);
+        }
+
+        .arsenal-card:hover .arsenal-card-media video,
+        .arsenal-card:hover .arsenal-card-media img {
+            transform: scale(1.1);
+            filter: contrast(1.2) brightness(1.3);
+        }
+
+        .arsenal-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(3, 10, 30, 0.9) 0%, rgba(3, 10, 30, 0.2) 25%, transparent 60%);
+            z-index: 2;
+        }
+
+        .arsenal-card-content {
+            position: relative;
+            z-index: 3;
+            margin-top: auto;
+            padding: 2.2rem;
+            transition: transform 0.5s ease;
+        }
+
+        .arsenal-card-tag {
+            color: #70d6ff;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.8rem;
+            display: block;
+        }
+
+        .arsenal-card-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 0.8rem;
+            letter-spacing: -1px;
+            color: white;
+        }
+
+        .arsenal-card-desc {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+            max-width: 90%;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .arsenal-card:hover .arsenal-card-desc {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .arsenal-view-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .arsenal-view-btn i {
+            width: 35px;
+            height: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .arsenal-card:hover .arsenal-view-btn i {
+            background: white;
+            color: #030514;
+            transform: translateX(8px);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="ds-cursor">
+        <div class="sharp-point"></div>
+        <div class="ds-text">DS</div>
+    </div>
+
+    <div class="audio-toggle" id="audioToggle" title="Mute/Unmute Atmosphere">
+        <svg viewBox="0 0 24 24" id="audioIcon" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        </svg>
+    </div>
+
+    <div class="space-container">
+        <div class="light-ray top-left"></div>
+        <div class="light-ray bottom-right"></div>
+    </div>
+    <canvas id="bgCanvas" class="bg-canvas"></canvas>
+    <canvas id="celebrationCanvas" class="celebration-canvas"></canvas>
+    <div id="lightWash" class="light-wash"></div>
+
+    <div class="bg-watermark">DS_66</div>
+
+    <!-- BENTO HUB -->
+    <div class="bento-hub" id="bentoHub">
+        <div class="tile-profile bento-tile" onclick="openCapsule('profile')">
+            <div class="persona-badge" style="margin-bottom: 10px;">Legacy</div>
+            <div class="tile-title">Who I Am</div>
+            <div class="tile-desc">I’m a passionate Full Stack Developer and AI enthusiast building futuristic,
+                high-impact digital experiences. I believe technology is about building meaningful experiences.</div>
+        </div>
+        <div class="tile-projects bento-tile" onclick="openCapsule('projects')">
+            <div class="persona-badge" style="margin-bottom: 10px;">Creations</div>
+            <div class="tile-title">Selected Works</div>
+            <div class="tile-desc">
+                <div class="tech-tags" style="margin-top: 5px;">
+                    <span>Smart Campus</span>
+                    <span>DataGenius AI</span>
+                    <span>RAG AI</span>
+                </div>
+            </div>
+        </div>
+        <div class="tile-skills bento-tile" onclick="openCapsule('skills')">
+            <div class="persona-badge" style="margin-bottom: 10px;">Arsenal</div>
+            <div class="tile-title">Tech Stack</div>
+            <div class="tile-desc">React, Node, AI, Django</div>
+        </div>
+        <div class="tile-experience bento-tile" onclick="openCapsule('experience')">
+            <div class="persona-badge" style="margin-bottom: 10px;">Timeline</div>
+            <div class="tile-title">The Journey</div>
+            <div class="tile-desc">2022 ➔ 2026<br>The Refinement Era<br><br>Currently at Karpagam Institute of
+                Technology.</div>
+        </div>
+        <div class="tile-contact bento-tile" onclick="openCapsule('contact')">
+            <div class="persona-badge" style="margin-bottom: 10px;">Link</div>
+            <div class="tile-title">Synchronize</div>
+            <div class="tile-desc">Let’s connect and build something impactful. Available for innovative collaborations.
+            </div>
+        </div>
+        <div class="tile-achievements bento-tile" onclick="openCapsule('achievements')">
+            <div class="persona-badge" style="margin-bottom: 10px;">Performance</div>
+            <div class="tile-title">Achievements</div>
+            <div class="tile-desc">TCS CodeVita: Rank 985<br>NPTEL Silver Elite</div>
+        </div>
+    </div>
+
+    <div class="close-hub" id="closeHub" onclick="exitHub()">Exit Hub // Back to Core</div>
+
+    <div class="guidance-wrapper" id="guidanceWrapper">
+        <div class="assistant-orb"></div>
+        <div class="guidance-text" id="guidanceText">The Koi awaits your arrival</div>
+    </div>
+
+    <div class="orb-container" id="mainContainer">
+        <!-- STYLISH CENTER LOGO -->
+        <div class="center-logo" id="centerLogo">
+            <div class="logo-text">DS_66</div>
+        </div>
+
+        <!-- MAIN ORB -->
+        <div class="pearl-orb" id="mainOrb">
+            <div class="image-container">
+                <img src="image.png" class="rotating-image" alt="Center Image">
+            </div>
+        </div>
+
+        <!-- SPLIT ORB LEFT: WHO IS DS -->
+        <div class="split-orb-wrapper left" id="leftWrapper">
+            <div class="split-orb" id="leftOrb">
+                <div class="image-container">
+                    <img src="image.png" class="rotating-image" alt="DS Profile">
+                </div>
+            </div>
+            <span class="orb-label">who is DS?</span>
+        </div>
+
+        <!-- SPLIT ORB RIGHT: HE IS DS !!! -->
+        <div class="split-orb-wrapper right" id="rightWrapper">
+            <div class="split-orb" id="rightOrb">
+                <div class="image-container">
+                    <img src="image.png" class="rotating-image" alt="DS Persona">
+                </div>
+            </div>
+            <span class="orb-label">he is DS!!!</span>
+        </div>
+    </div>
+
+    <!-- INTERACTIVE CONTENT OVERLAY -->
+    <div class="intro-overlay" id="introOverlay">
+        <div class="intro-card" id="introCard">
+            <div class="persona-badge" id="personaBadge">Persona</div>
+            <img src="ds.jpeg" class="reveal-photo" id="dsRevealPhoto" alt="Dinesh Surrya">
+            <h1 id="overlayTitle">Hi,</h1>
+            <h2 id="overlaySubtitle">I’m Dinesh Surrya.</h2>
+            <div id="overlayContent">
+                <!-- Content will be injected -->
+            </div>
+            <div class="card-footer" style="display: flex; gap: 15px; margin-top: 30px; justify-content: center;">
+                <button class="explore-btn" id="exploreHubBtn">Explore Hub</button>
+                <button class="explore-btn"
+                    style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);"
+                    id="backToCoreBtn">Back to Core</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CAPSULE SYSTEM (DETAIL OVERLAY) -->
+    <div class="capsule-overlay" id="capsuleOverlay">
+        <div class="close-hub" style="top: 40px; right: 40px;" onclick="closeCapsule()">Close Section // Return to Hub
+        </div>
+        <div class="capsule-content" id="capsuleContent">
+            <!-- Dynamic Content -->
+        </div>
+    </div>
+
+    <script>
+        // -------------------------------
+        // CINEMATIC SNOWFALL BACKGROUND
+        // -------------------------------
+        const bgCanvas = document.getElementById('bgCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        let particles = [];
+        let settledParticles = [];
+        const maxSettled = 600;
+
+        function initBackground() {
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
+            settledParticles = [];
+            particles = [];
+            // Initialize falling snow
+            const snowCount = Math.min(window.innerWidth / 8, 150);
+            for (let i = 0; i < snowCount; i++) {
+                particles.push(new SnowParticle());
+            }
+        }
+
+        class SnowParticle {
+            constructor() {
+                this.init();
+                // Randomize initial vertical position to prevent "all-at-once" falling
+                this.y = Math.random() * bgCanvas.height;
+            }
+            init() {
+                this.x = Math.random() * bgCanvas.width * 1.2;
+                this.y = Math.random() * -bgCanvas.height;
+                this.size = Math.random() * 1.5 + 0.3;
+                this.speedX = -0.2 - Math.random() * 0.5;
+                this.speedY = 0.8 + Math.random() * 1.2;
+                this.opacity = Math.random() * 0.5 + 0.2;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                // Snow accumulates at bottom
+                if (this.y >= bgCanvas.height - 2) {
+                    if (settledParticles.length < maxSettled) {
+                        settledParticles.push({
+                            x: this.x,
+                            y: bgCanvas.height - Math.random() * 4,
+                            size: this.size,
+                            opacity: this.opacity * 0.6
+                        });
+                    }
+                    this.init();
+                }
+
+                if (this.x < -20) this.x = bgCanvas.width + 20;
+            }
+            draw() {
+                bgCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                bgCtx.beginPath();
+                bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                bgCtx.fill();
+            }
+        }
+
+        function drawBackground() {
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+            // Draw falling snow
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            // Draw accumulated snow
+            settledParticles.forEach(p => {
+                bgCtx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
+                bgCtx.beginPath();
+                bgCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                bgCtx.fill();
+            });
+
+            // Gentle floor glow
+            const gradient = bgCtx.createLinearGradient(0, bgCanvas.height - 100, 0, bgCanvas.height);
+            gradient.addColorStop(0, 'rgba(112, 214, 255, 0)');
+            gradient.addColorStop(1, 'rgba(112, 214, 255, 0.05)');
+            bgCtx.fillStyle = gradient;
+            bgCtx.fillRect(0, bgCanvas.height - 100, bgCanvas.width, 100);
+
+            requestAnimationFrame(drawBackground);
+        }
+
+        window.addEventListener('resize', initBackground);
+        initBackground();
+        drawBackground();
+
+        // Track global mouse
+        document.addEventListener('mousemove', (e) => {
+            mousePosition.x = e.clientX - window.innerWidth / 2;
+            mousePosition.y = e.clientY - window.innerHeight / 2;
+        });
+
+        const mainContainer = document.getElementById('mainContainer');
+        const mainOrb = document.getElementById('mainOrb');
+        const leftWrapper = document.getElementById('leftWrapper');
+        const rightWrapper = document.getElementById('rightWrapper');
+        const centerLogo = document.getElementById('centerLogo');
+        const leftOrb = document.getElementById('leftOrb');
+        const rightOrb = document.getElementById('rightOrb');
+        const introOverlay = document.getElementById('introOverlay');
+        const introCard = document.getElementById('introCard');
+        const dsPhoto = document.getElementById('dsRevealPhoto');
+        const personaBadge = document.getElementById('personaBadge');
+        const overlayTitle = document.getElementById('overlayTitle');
+        const overlaySubtitle = document.getElementById('overlaySubtitle');
+        const overlayContent = document.getElementById('overlayContent');
+        const guidanceWrapper = document.getElementById('guidanceWrapper');
+        const guidanceText = document.getElementById('guidanceText');
+        const bentoHub = document.getElementById('bentoHub');
+        const closeHub = document.getElementById('closeHub');
+        const exploreHubBtn = document.getElementById('exploreHubBtn');
+        const capsuleOverlay = document.getElementById('capsuleOverlay');
+        const capsuleContent = document.getElementById('capsuleContent');
+        const dsCursor = document.getElementById('ds-cursor');
+        let lastX = 0;
+        let lastY = 0;
+        const audioToggle = document.getElementById('audioToggle');
+        const audioIcon = document.getElementById('audioIcon');
+        const canvas = document.getElementById('celebrationCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const phrases = [
+            "The Koi awaits your arrival",
+            "Move closer to unveil the mystery",
+            "A dual nature resides within",
+            "Click the core to begin your journey",
+            "Curiosity is your greatest guide"
+        ];
+        let currentPhrase = 0;
+
+        setInterval(() => {
+            if (!mainOrb.classList.contains('hidden')) {
+                guidanceText.style.opacity = '0';
+                setTimeout(() => {
+                    currentPhrase = (currentPhrase + 1) % phrases.length;
+                    guidanceText.innerText = phrases[currentPhrase];
+                    guidanceText.style.opacity = '1';
+                }, 500);
+            }
+        }, 4000);
+
+        // Logic to track mouse proximity
+        document.addEventListener('mousemove', (e) => {
+            const wrappers = [leftWrapper, rightWrapper];
+            if (!mainOrb.classList.contains('hidden')) {
+                const mainRect = mainOrb.getBoundingClientRect();
+                const distToMain = Math.sqrt(Math.pow(e.clientX - (mainRect.left + mainRect.width / 2), 2) + Math.pow(e.clientY - (mainRect.top + mainRect.height / 2), 2));
+                if (distToMain < 300) {
+                    guidanceText.innerText = "The Core pulses... Reveal it.";
+                    mainOrb.classList.add('near');
+                } else {
+                    mainOrb.classList.remove('near');
+                }
+            } else if (currentOrbState === ORB_STATES.IDLE && !introOverlay.classList.contains('active')) {
+                // If orbs are split and no overlay is active, provide guidance for split orbs
+                let nearAny = false;
+                wrappers.forEach(w => {
+                    const rect = w.getBoundingClientRect();
+                    const dist = Math.sqrt(Math.pow(e.clientX - (rect.left + rect.width / 2), 2) + Math.pow(e.clientY - (rect.top + rect.height / 2), 2));
+                    if (dist < 300) nearAny = true;
+                });
+
+                if (nearAny) {
+                    guidanceText.innerText = "Choose a path to learn more";
+                } else {
+                    guidanceText.innerText = "The path has diverged. Which will you seek?";
+                }
+            }
+
+            // Restored proximity for split orbs hover effects
+            wrappers.forEach(w => {
+                const rect = w.getBoundingClientRect();
+                const dist = Math.sqrt(Math.pow(e.clientX - (rect.left + rect.width / 2), 2) + Math.pow(e.clientY - (rect.top + rect.height / 2), 2));
+                if (dist < 250) {
+                    w.classList.add('near');
+                } else {
+                    w.classList.remove('near');
+                }
+            });
+        });
+
+        let animationData = {
+            rotation: 0,
+            rotationSpeed: 0.3,
+            scale: 1,
+            x: 50, // Center coordinate x
+            y: 50, // Center coordinate y
+            glowOpacity: 0.3,
+            glowColor: '#70d6ff',
+            labelScale: 1,
+            labelY: 0,
+            labelOpacity: 0
+        };
+
+        function lerp(a, b, n) { return (1 - n) * a + n * b; }
+
+        // Cinematic Rotation Control
+        let mainRot = 0, leftRot = 0, rightRot = 0;
+        let mainSpeed = 0.3, leftSpeed = 0.214, rightSpeed = 0.25;
+        let activeExpandOrb = null;
+
+        function updateOrbRotation() {
+            if (activeExpandOrb) {
+                // If an orb is active, update its position and scale dynamically
+                const wrapper = activeExpandOrb === 'left' ? leftWrapper : rightWrapper;
+                const orbImg = wrapper.querySelector('.rotating-image');
+                const label = wrapper.querySelector('.orb-label');
+
+                animationData.rotation += animationData.rotationSpeed;
+                wrapper.style.left = `${animationData.x}%`;
+                wrapper.style.transform = `translate(-50%, -50%) scale(${animationData.scale})`;
+
+                if (orbImg) orbImg.style.transform = `rotate(${animationData.rotation}deg)`;
+
+                if (label) {
+                    label.style.transform = `translateY(${animationData.labelY}px) scale(${animationData.labelScale})`;
+                    label.style.opacity = animationData.labelOpacity;
+                    label.style.marginTop = "0"; // Override margin for centering
+                }
+            } else {
+                // Idle or Single Orb Rotation
+                const getIdleSpeed = (base, type) => {
+                    const orbEl = type === 'main' ? mainOrb : (type === 'left' ? leftOrb : rightOrb);
+                    const isNear = orbEl ? orbEl.parentElement.classList.contains('near') || orbEl.classList.contains('near') : false;
+                    return isNear ? base * 4 : base;
+                };
+
+                // 1. Center Main Orb
+                mainSpeed += (getIdleSpeed(0.3, 'main') - mainSpeed) * 0.05;
+                mainRot += mainSpeed;
+                const mainImg = document.querySelector('#mainOrb .rotating-image');
+                if (mainImg) mainImg.style.transform = `rotate(${mainRot}deg)`;
+
+                // 2. Left Orb
+                leftSpeed += (getIdleSpeed(0.214, 'left') - leftSpeed) * 0.05;
+                leftRot += leftSpeed;
+                const leftImg = document.querySelector('#leftOrb .rotating-image');
+                if (leftImg) leftImg.style.transform = `rotate(${leftRot}deg)`;
+
+                // 3. Right Orb
+                rightSpeed += (getIdleSpeed(0.25, 'right') - rightSpeed) * 0.05;
+                rightRot += rightSpeed;
+                const rightImg = document.querySelector('#rightOrb .rotating-image');
+                if (rightImg) rightImg.style.transform = `rotate(${rightRot}deg)`;
+            }
+
+            requestAnimationFrame(updateOrbRotation);
+        }
+        updateOrbRotation();
+
+        // -------------------------------
+        // STATE MACHINE & ROUTING
+        // -------------------------------
+        const APP_STATES = {
+            IDLE: 'IDLE',
+            EXPANDING: 'EXPANDING',
+            CONTENT: 'CONTENT',
+            HUB: 'HUB',
+            TRANSITION: 'TRANSITION'
+        };
+
+        let appState = APP_STATES.IDLE;
+
+        const navigateTo = (state, params = {}) => {
+            if (appState === APP_STATES.TRANSITION) return;
+            const previousState = appState;
+            appState = APP_STATES.TRANSITION;
+
+            switch (state) {
+                case APP_STATES.CONTENT:
+                    openSelectedOrb(params.type);
+                    appState = APP_STATES.CONTENT;
+                    break;
+                case APP_STATES.IDLE:
+                    navigateBackToCore();
+                    break;
+                case APP_STATES.HUB:
+                    enterHub();
+                    break;
+            }
+        };
+
+        // Cinematic State Machine Logic
+        const ORB_STATES = {
+            IDLE: 'IDLE',
+            CENTERING: 'CENTERING',
+            CHARGING: 'CHARGING',
+            STABILIZING: 'STABILIZING',
+            PORTAL_EXPANSION: 'PORTAL_EXPANSION',
+            BLURRED: 'BLURRED',
+            DIALOG_ACTIVE: 'DIALOG_ACTIVE',
+            STABLE: 'STABLE'
+        };
+        let currentOrbState = ORB_STATES.IDLE;
+
+        // Master Cinematic Sequence
+        const startExpansionSequence = (orbType, targetElement) => {
+            if (currentOrbState !== ORB_STATES.IDLE || appState === APP_STATES.TRANSITION) return;
+
+            appState = APP_STATES.TRANSITION; // Lock other interactions during sequence
+
+            if (orbType === 'main') {
+                // Request fullscreen for total immersion
+                try {
+                    const de = document.documentElement;
+                    if (de.requestFullscreen) de.requestFullscreen();
+                    else if (de.webkitRequestFullscreen) de.webkitRequestFullscreen();
+                    else if (de.msRequestFullscreen) de.msRequestFullscreen();
+                } catch (e) {
+                    console.warn("Fullscreen blocked", e);
+                }
+
+                targetElement.classList.add('charging');
+                playPing(440, 0.05);
+                setTimeout(() => {
+                    targetElement.classList.add('expanded');
+                    const lightWash = document.getElementById('lightWash');
+                    setTimeout(() => {
+                        lightWash.classList.add('active');
+                        setTimeout(() => {
+                            targetElement.classList.add('fade-out');
+                            leftWrapper.classList.add('active');
+                            rightWrapper.classList.add('active');
+                            centerLogo.classList.add('visible');
+                            setTimeout(() => {
+                                targetElement.classList.add('hidden');
+                                targetElement.style.display = 'none'; // Ensure it's fully gone from hit-testing
+                                lightWash.classList.remove('active');
+                                appState = APP_STATES.IDLE; // Reset state to allow clicking split orbs
+                            }, 1000);
+                        }, 500);
+                    }, 1500);
+                }, 1000);
+                return;
+            }
+
+            activeExpandOrb = orbType;
+            const wrapper = orbType === 'left' ? leftWrapper : rightWrapper;
+            const otherWrapper = orbType === 'left' ? rightWrapper : leftWrapper;
+            const startX = orbType === 'left' ? 15 : 85;
+
+            currentOrbState = ORB_STATES.CENTERING;
+            document.body.style.pointerEvents = 'none';
+
+            // IMPORTANT: For the right orb, we must ensure 'left' takes precedence over 'right'
+            if (orbType === 'right') {
+                wrapper.style.right = 'auto';
+            }
+
+            animationData.x = startX;
+            animationData.scale = 1;
+            animationData.rotationSpeed = 0.5;
+
+            console.log(`Expansion Starting: Type=${orbType}, startX=${startX}`);
+
+            initAudio();
+            try { playPing(440, 0.05); } catch (e) { console.warn("Audio Context failed", e); }
+
+            let startTime = performance.now();
+            let activeOrbEl = targetElement;
+
+            function sequenceLoop(time) {
+                let elapsed = time - startTime;
+
+                if (currentOrbState === ORB_STATES.CENTERING) {
+                    let progress = Math.min(elapsed / 500, 1);
+                    animationData.x = lerp(startX, 50, progress);
+                    animationData.rotationSpeed = lerp(0.5, 1.2, progress);
+                    animationData.labelOpacity = lerp(0.2, 1, progress);
+                    otherWrapper.style.opacity = lerp(1, 0, progress);
+                    centerLogo.style.opacity = lerp(1, 0, progress);
+                    guidanceWrapper.style.opacity = lerp(1, 0, progress);
+
+                    if (progress >= 1) {
+                        console.log("State reached: CHARGING");
+                        currentOrbState = ORB_STATES.CHARGING;
+                        startTime = time;
+                        activeOrbEl.classList.add('phase-charging');
+                        playPing(660, 0.03);
+                    }
+                }
+                else if (currentOrbState === ORB_STATES.CHARGING) {
+                    let progress = Math.min((time - startTime) / 600, 1);
+                    animationData.rotationSpeed = lerp(1.2, 4.5, progress);
+
+                    if (progress >= 1) {
+                        console.log("State reached: STABILIZING");
+                        currentOrbState = ORB_STATES.STABILIZING;
+                        startTime = time;
+                        activeOrbEl.classList.remove('phase-charging');
+                        activeOrbEl.classList.add('phase-stabilized');
+                        playPing(330, 0.05);
+                    }
+                }
+                else if (currentOrbState === ORB_STATES.STABILIZING) {
+                    let progress = Math.min((time - startTime) / 400, 1);
+                    animationData.rotationSpeed = lerp(4.5, 0.6, progress);
+
+                    if (progress >= 1) {
+                        currentOrbState = ORB_STATES.PORTAL_EXPANSION;
+                        startTime = time;
+                        activeOrbEl.classList.remove('phase-stabilized');
+                    }
+                }
+                else if (currentOrbState === ORB_STATES.PORTAL_EXPANSION) {
+                    let progress = Math.min((time - startTime) / 600, 1);
+                    let ease = 1 - Math.pow(1 - progress, 3);
+
+                    animationData.labelScale = lerp(1, 2.5, ease);
+                    animationData.labelY = lerp(0, -220, ease);
+                    animationData.scale = lerp(1, 1.2, ease);
+                    animationData.rotationSpeed = 0.5;
+
+                    if (progress > 0.2) {
+                        bgCanvas.classList.add('bg-blur-active');
+                        document.querySelector('.space-container').classList.add('bg-blur-active');
+                        activeOrbEl.style.filter = "blur(8px)";
+                    }
+
+                    if (progress >= 1) {
+                        console.log("State reached: DIALOG_ACTIVE");
+                        currentOrbState = ORB_STATES.DIALOG_ACTIVE;
+                        startTime = time;
+                    }
+                }
+                else if (currentOrbState === ORB_STATES.DIALOG_ACTIVE) {
+                    console.log("Opening Selected Orb...");
+                    openSelectedOrb(orbType);
+                    animationData.rotationSpeed = 0.3;
+                    wrapper.style.zIndex = "40";
+                    currentOrbState = ORB_STATES.STABLE;
+                    appState = APP_STATES.CONTENT;
+                    document.body.style.pointerEvents = 'all';
+                }
+
+                if (currentOrbState !== ORB_STATES.STABLE) {
+                    requestAnimationFrame(sequenceLoop);
+                }
+            }
+            requestAnimationFrame(sequenceLoop);
+        };
+
+        const navigateBackToCore = () => {
+            playPing(440, 0.02);
+            if (introOverlay) introOverlay.classList.remove('active');
+            if (closeHub) closeHub.style.display = 'none'; // Ensure hub exit UI is hidden
+
+            // Start fading out the blur before resetting
+            bgCanvas.classList.remove('bg-blur-active');
+            document.querySelector('.space-container').classList.remove('bg-blur-active');
+
+            let startTime = performance.now();
+            let startScale = animationData.scale;
+            let startX = animationData.x;
+            let startRotSpeed = animationData.rotationSpeed;
+            const targetX = activeExpandOrb === 'left' ? 15 : 85;
+            const wrapper = activeExpandOrb === 'left' ? leftWrapper : rightWrapper;
+
+            // Fade out current content
+            wrapper.style.opacity = '1';
+
+            function backAnimate(time) {
+                let progress = Math.min((time - startTime) / 800, 1);
+                let ease = 1 - Math.pow(1 - progress, 3);
+
+                animationData.scale = lerp(startScale, 1, ease);
+                animationData.x = lerp(startX, targetX, ease);
+                animationData.rotationSpeed = lerp(startRotSpeed, 0.3, ease);
+
+                // Reset Label
+                animationData.labelScale = lerp(2.5, 1, ease);
+                animationData.labelY = lerp(-220, 0, ease);
+                animationData.labelOpacity = lerp(1, 0.2, ease);
+
+                const otherWrapper = activeExpandOrb === 'left' ? rightWrapper : leftWrapper;
+                otherWrapper.style.opacity = lerp(0, 1, ease);
+                centerLogo.style.opacity = lerp(0, 1, ease);
+                guidanceWrapper.style.opacity = lerp(0, 1, ease);
+
+                if (progress < 1) {
+                    requestAnimationFrame(backAnimate);
+                } else {
+                    currentOrbState = ORB_STATES.IDLE;
+                    appState = APP_STATES.IDLE; // Unlock transition
+                    activeExpandOrb = null;
+                    mainOrb.style.display = ''; // Restore main orb display if reset to core
+                    [mainOrb, leftOrb, rightOrb].forEach(orb => {
+                        orb.classList.remove('phase-charging', 'phase-stabilized', 'phase-expanding', 'phase-shrink', 'phase-final-pulse');
+                        orb.style.zIndex = "";
+                        orb.style.filter = "";
+                    });
+
+                    // Reset positions
+                    leftWrapper.style.left = '15%';
+                    leftWrapper.style.transform = 'translateY(-50%)';
+                    rightWrapper.style.left = 'auto';
+                    rightWrapper.style.right = '15%';
+                    rightWrapper.style.transform = 'translateY(-50%)';
+                    leftWrapper.style.opacity = '1';
+                    rightWrapper.style.opacity = '1';
+
+                    document.body.style.pointerEvents = 'all';
+                }
+            }
+            requestAnimationFrame(backAnimate);
+        };
+
+
+        const enterHub = () => {
+            initAudio();
+            playPing(1100, 0.05);
+            introOverlay.classList.remove('active');
+
+            // Reference: Layout in hub.html uses .active-hub on body
+            // We'll simulate the scale(15) expansion for total immersion
+            document.body.classList.add('active-hub');
+
+            // Hub scale-up cinematic
+            leftWrapper.style.transition = "all 1.5s cubic-bezier(0.19, 1, 0.22, 1)";
+            rightWrapper.style.transition = "all 1.5s cubic-bezier(0.19, 1, 0.22, 1)";
+            centerLogo.style.transition = "all 1.2s ease";
+
+            leftWrapper.style.transform = "translate(-50%, -50%) scale(15)";
+            rightWrapper.style.transform = "translate(-50%, -50%) scale(15)";
+            leftWrapper.style.opacity = "0.05";
+            rightWrapper.style.opacity = "0.05";
+            centerLogo.style.opacity = "0";
+            guidanceWrapper.style.opacity = "0";
+
+            setTimeout(() => {
+                mainContainer.style.display = 'none';
+                bentoHub.classList.add('active');
+                closeHub.style.display = 'block';
+                closeHub.style.opacity = '1';
+                appState = APP_STATES.HUB;
+                addCursorHover();
+            }, 1000);
+        };
+
+        const exitHub = () => {
+            playPing(440, 0.03);
+            document.body.classList.remove('active-hub');
+            bentoHub.classList.remove('active');
+            closeHub.style.display = 'none';
+            mainContainer.style.display = 'flex';
+
+            // Reset orb styles from cinematic
+            leftWrapper.style.transition = "all 0.8s ease";
+            rightWrapper.style.transition = "all 0.8s ease";
+            leftWrapper.style.transform = "translateY(-50%)";
+            rightWrapper.style.transform = "translateY(-50%)";
+            leftWrapper.style.opacity = "1";
+            rightWrapper.style.opacity = "1";
+
+            setTimeout(() => {
+                mainContainer.style.opacity = '1';
+                mainContainer.style.transform = 'scale(1)';
+                centerLogo.style.opacity = '1';
+                guidanceWrapper.style.opacity = '1';
+                navigateBackToCore();
+            }, 50);
+        };
+
+        const openSelectedOrb = (type) => {
+            if (type === 'left') {
+                if (dsPhoto) dsPhoto.style.display = 'none';
+                personaBadge.innerText = "The Architect";
+                overlayTitle.innerText = "About Me";
+                overlaySubtitle.innerText = "who is DS?";
+                overlayContent.innerHTML = `
+                    <div class="content-box" style="margin-top: 20px;">
+                        <p>I am a developer driven by curiosity and the desire to build impactful solutions. I specialize in crafting seamless user experiences with modern web technologies.</p>
+                        <p style="margin-top: 15px;">My journey is defined by constant learning and a commitment to excellence in every line of code I write.</p>
+                    </div>`;
+            } else {
+                if (dsPhoto) dsPhoto.style.display = 'block';
+                personaBadge.innerText = "The Visionary";
+                overlayTitle.innerText = "Persona";
+                overlaySubtitle.innerText = "he is DS!!!";
+                overlayContent.innerHTML = `
+                    <div class="dual-box-container">
+                        <div class="content-box">
+                            <div class="box-tag">Core Persona</div>
+                            <p>Dinesh Surrya (DS) is more than just a developer. He is a problem solver, a creative thinker, and a disciplined learner.</p>
+                        </div>
+                        <div class="content-box">
+                            <div class="box-tag">Core Philosophy</div>
+                            <p>Whether it's mastering a new framework or designing complex systems, his approach remains the same: clarity, ownership, and steady improvement.</p>
+                        </div>
+                    </div>`;
+            }
+
+            if (introOverlay) {
+                introOverlay.classList.add('active');
+            }
+            appState = APP_STATES.CONTENT;
+            guidanceWrapper.style.opacity = '0';
+            triggerCelebration();
+        };
+
+        // Event Bindings
+        mainOrb.addEventListener('click', (e) => { e.stopPropagation(); startExpansionSequence('main', mainOrb); });
+        leftWrapper.addEventListener('click', (e) => { e.stopPropagation(); startExpansionSequence('left', leftOrb); });
+        rightWrapper.addEventListener('click', (e) => { e.stopPropagation(); startExpansionSequence('right', rightOrb); });
+
+        document.getElementById('exploreHubBtn').addEventListener('click', () => navigateTo(APP_STATES.HUB));
+        document.getElementById('backToCoreBtn').addEventListener('click', () => navigateTo(APP_STATES.IDLE));
+
+        // Particle System (Renamed to avoid conflict)
+        let celebrationParticles = [];
+        const colors = ['#70d6ff', '#ffffff', '#ffd700', '#b8c1ec'];
+        function resizeCelebration() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeCelebration); resizeCelebration();
+
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width; this.y = canvas.height + 10;
+                this.size = Math.random() * 3 + 1; this.speedY = Math.random() * -3 - 1;
+                this.speedX = Math.random() * 2 - 1; this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.opacity = Math.random() * 0.5 + 0.3;
+            }
+            update() { this.y += this.speedY; this.x += this.speedX; this.opacity -= 0.005; if (this.opacity <= 0) this.reset(); }
+            draw() { ctx.globalAlpha = this.opacity; ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
+        }
+
+        function triggerCelebration() {
+            celebrationParticles = []; for (let i = 0; i < 50; i++) celebrationParticles.push(new Particle());
+            let start = Date.now();
+            function render() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                celebrationParticles.forEach(p => { p.update(); p.draw(); });
+                if (Date.now() - start < 3000) requestAnimationFrame(render);
+                else ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            render();
+        }
+
+
+
+        // -------------------------------
+        // DS CUSTOM CURSOR LOGIC (Enhanced Hotspot & Global Hide)
+        // -------------------------------
+        if (!window.matchMedia("(pointer: fine)").matches) {
+            dsCursor.style.display = 'none';
+        }
+
+        function createSparkle() {
+            if (!window.matchMedia("(pointer: fine)").matches) return;
+            const dsTextEl = dsCursor.querySelector('.ds-text');
+            const rect = dsTextEl.getBoundingClientRect();
+            // Calculate center of the DS text
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
+
+            const sparkle = document.createElement('div');
+            sparkle.className = 'ds-trail';
+            sparkle.innerText = 'DS';
+
+            const ox = (Math.random() - 0.5) * 10;
+            const oy = (Math.random() - 0.5) * 10;
+
+            // Trail originates from the DS text center
+            sparkle.style.left = (x + ox) + 'px';
+            sparkle.style.top = (y + oy) + 'px';
+
+            const colors = ['#ff4d6d', '#ffd700', '#ffffff'];
+            sparkle.style.color = colors[Math.floor(Math.random() * colors.length)];
+            sparkle.style.textShadow = `0 0 8px ${sparkle.style.color}`;
+
+            document.body.appendChild(sparkle);
+
+            setTimeout(() => {
+                sparkle.remove();
+            }, 700);
+        }
+
+        let cursorRotation = 0;
+        document.addEventListener('mousemove', (e) => {
+            dsCursor.style.left = e.clientX + 'px';
+            dsCursor.style.top = e.clientY + 'px';
+
+            const dx = e.clientX - lastX;
+            const dy = e.clientY - lastY;
+            const dist = Math.hypot(dx, dy);
+
+            // Micro-tilt logic centered on the tip
+            if (dist > 2) {
+                const targetRotation = Math.min(Math.max(dx * 0.5, -15), 15);
+                cursorRotation += (targetRotation - cursorRotation) * 0.1;
+                const baseScale = dsCursor.classList.contains('hover') ? 1.2 : 1.0;
+                dsCursor.style.transform = `rotate(${cursorRotation}deg) scale(${baseScale})`;
+            }
+
+            if (dist > 15) {
+                createSparkle();
+                lastX = e.clientX;
+                lastY = e.clientY;
+            }
+        });
+
+        const addCursorHover = () => {
+            const targets = document.querySelectorAll('.pearl-orb, .split-orb, .bento-tile, .explore-btn, .close-hub, .audio-toggle, .project-card, .contact-btn');
+            targets.forEach(t => {
+                t.addEventListener('mouseenter', () => {
+                    dsCursor.classList.add('hover');
+                    dsCursor.style.transform = `rotate(${cursorRotation}deg) scale(1.2)`;
+                });
+                t.addEventListener('mouseleave', () => {
+                    dsCursor.classList.remove('hover');
+                    dsCursor.style.transform = `rotate(${cursorRotation}deg) scale(1.0)`;
+                });
+                t.addEventListener('mousedown', () => {
+                    dsCursor.style.transform = `rotate(${cursorRotation}deg) scale(0.8)`;
+                    for (let i = 0; i < 8; i++) {
+                        setTimeout(() => createSparkle(), i * 50);
+                    }
+                });
+                t.addEventListener('mouseup', () => {
+                    const baseScale = dsCursor.classList.contains('hover') ? 1.2 : 1.0;
+                    dsCursor.style.transform = `rotate(${cursorRotation}deg) scale(${baseScale})`;
+                });
+            });
+        };
+        addCursorHover();
+
+        // -------------------------------
+        // AUDIO AURA LOGIC (Web Audio API)
+        // -------------------------------
+        let audioCtx, oscillator, gainNode;
+        let isMuted = true;
+
+        const initAudio = () => {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+                // Low Cosmic Hum (Base)
+                oscillator = audioCtx.createOscillator();
+                gainNode = audioCtx.createGain();
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(40, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(isMuted ? 0 : 0.05, audioCtx.currentTime);
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.start();
+            }
+        };
+
+        const playPing = (freq = 880, vol = 0.02) => {
+            if (isMuted || !audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.connect(g);
+            g.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            g.gain.setValueAtTime(vol, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
+        };
+
+        audioToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            initAudio();
+            isMuted = !isMuted;
+            gainNode.gain.setTargetAtTime(isMuted ? 0 : 0.05, audioCtx.currentTime, 0.1);
+            audioIcon.innerHTML = isMuted ?
+                '<path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line>' :
+                '<path d="M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>';
+            playPing(660);
+        });
+
+        // -------------------------------
+        // HUB & CAPSULE LOGIC
+        // -------------------------------
+        // Deprecated listeners moved to state machine
+        /*
+        exploreHubBtn.addEventListener('click', () => {
+             ...
+        });
+        */
+
+        const openCapsule = (section) => {
+            playPing(880, 0.03);
+            const content = PORTFOLIO_CONTENT.sections[section];
+            if (!content) return;
+
+            capsuleContent.innerHTML = content;
+            capsuleOverlay.classList.add('active');
+            addCursorHover(); // Refresh targets
+
+            if (section === 'projects') {
+                renderArsenal();
+            }
+        };
+
+        function renderArsenal() {
+            const grid = document.getElementById('projectArsenalGrid');
+            if (!grid) {
+                // FALLBACK: In case the template isn't updated, we inject the container
+                capsuleContent.innerHTML += `<div class="project-arsenal-grid" id="projectArsenalGrid"></div>`;
+                return renderArsenal();
+            }
+
+            const projects = PORTFOLIO_CONTENT.projectsData;
+            const projectKeys = Object.keys(projects);
+
+            // Visual Assets Library
+            const videoLibrary = [
+                'https://assets.mixkit.co/videos/preview/mixkit-abstract-blue-and-purple-ink-flowing-in-water-43306-prime.mp4',
+                'https://assets.mixkit.co/videos/preview/mixkit-abstract-fast-particles-background-v2-42171-prime.mp4',
+                'https://assets.mixkit.co/videos/preview/mixkit-abstract-moving-lines-of-white-light-on-black-background-42139-prime.mp4',
+                'https://assets.mixkit.co/videos/preview/mixkit-abstract-tunnel-composed-of-small-points-42111-prime.mp4'
+            ];
+            const imageLibrary = [
+                'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200',
+                'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200',
+                'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1200'
+            ];
+
+            projectKeys.forEach((key, index) => {
+                const p = projects[key];
+                const video = videoLibrary[index % videoLibrary.length];
+                const img = imageLibrary[index % imageLibrary.length];
+
+                const card = document.createElement('div');
+                card.className = 'arsenal-card';
+                card.innerHTML = `
+                    <div class="arsenal-card-media">
+                        <video loop muted playsinline><source src="${video}" type="video/mp4"></video>
+                        <img src="${img}" alt="${p.title}">
+                    </div>
+                    <div class="arsenal-card-content">
+                        <span class="arsenal-card-tag">${p.tag}</span>
+                        <h3 class="arsenal-card-title">${p.title}</h3>
+                        <p class="arsenal-card-desc">${p.desc.substring(0, 100)}...</p>
+                        <div class="arsenal-view-btn">
+                            <i>→</i>
+                            <span>View Case Study</span>
+                        </div>
+                    </div>
+                `;
+
+                card.addEventListener('mouseenter', () => card.querySelector('video').play());
+                card.addEventListener('mouseleave', () => card.querySelector('video').pause());
+                card.addEventListener('click', () => openProjectDetail(key));
+
+                grid.appendChild(card);
+            });
+
+            // Set Count
+            const badge = document.getElementById('projectCountBadge');
+            if (badge) badge.innerText = `The Arsenal // ${projectKeys.length} PROJECTS DETECTED`;
+
+            // GSAP Scroll Reveal Scroll Behavior
+            gsap.registerPlugin(ScrollTrigger);
+            document.querySelectorAll('.arsenal-card').forEach((card) => {
+                gsap.fromTo(card,
+                    { opacity: 0, y: 50, scale: 0.95 },
+                    {
+                        opacity: 1, y: 0, scale: 1,
+                        scrollTrigger: {
+                            trigger: card,
+                            scroller: "#capsuleOverlay", // This is the scrolling container
+                            start: "top 95%",
+                            end: "top 10%",
+                            toggleActions: "play reverse play reverse"
+                        }
+                    }
+                );
+            });
+        }
+
+        const closeCapsule = () => {
+            playPing(440, 0.02);
+            capsuleOverlay.classList.remove('active');
+        };
+
+        const scrollSlider = (direction) => {
+            const slider = document.getElementById('projectSlider');
+            if (slider) {
+                // Ensure one-by-one movement by scrolling exactly one card width + gap
+                const card = slider.querySelector('.project-card');
+                const cardWidth = card.offsetWidth;
+                const gap = 30; // Gap defined in CSS
+                slider.scrollBy({ left: direction * (cardWidth + gap), behavior: 'smooth' });
+                playPing(660, 0.01);
+            }
+        };
+
+        const openProjectDetail = (pid) => {
+            playPing(880, 0.03);
+            let pContent = '';
+
+            const p = PORTFOLIO_CONTENT.projectsData[pid];
+            if (!p) return;
+
+            pContent = `
+                <div class="intro-card" style="max-width: 100%; border: 1px solid rgba(112, 214, 255, 0.3);">
+                    <div class="persona-badge">${p.tag}</div>
+                    <h1>${p.title}</h1>
+                    <p style="margin-top: 20px; font-size: 1.2rem; line-height: 1.6;">${p.desc}</p>
+                    <div class="card-footer" style="margin-top: 30px;">
+                        <button class="explore-btn" onclick="openCapsule('projects')">Back to Projects</button>
+                    </div>
+                </div>`;
+
+            // Reuse capsule overlay logic
+            const capsuleOverlay = document.getElementById('capsuleOverlay');
+            const capsuleContent = document.getElementById('capsuleContent');
+            capsuleContent.innerHTML = pContent;
+            capsuleOverlay.classList.add('active');
+            addCursorHover();
+        };
+
+        const handleReset = () => {
+            isFullscreenMode = false;
+            isSpinningUp = false;
+            activeExpandOrb = null;
+            mainSpeed = 0.3;
+            leftSpeed = 0.214;
+            rightSpeed = 0.25;
+
+            bgCanvas.style.opacity = '1';
+            leftWrapper.style.opacity = '1';
+            rightWrapper.style.opacity = '1';
+            leftWrapper.classList.remove('expanding');
+            rightWrapper.classList.remove('expanding');
+
+            document.body.classList.remove('fullscreen-mode');
+            [mainOrb, leftOrb, rightOrb].forEach(orb => {
+                orb.classList.remove('expanded', 'charging', 'fade-out', 'hidden');
+            });
+
+            leftWrapper.classList.remove('active');
+            rightWrapper.classList.remove('active');
+            centerLogo.classList.remove('visible');
+            guidanceText.style.opacity = '0';
+            setTimeout(() => {
+                guidanceText.innerText = phrases[0];
+                guidanceText.style.opacity = '1';
+                guidanceWrapper.style.opacity = '1';
+            }, 500);
+        };
+
+        document.addEventListener('click', (e) => {
+            // Only allow background-clicks to reset if we are on the selection screen or an active dialog is present
+            if (appState === APP_STATES.CONTENT && !introCard.contains(e.target)) {
+                navigateTo(APP_STATES.IDLE);
+            }
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+            initBackground();
+            drawBackground();
+            addCursorHover();
+            console.log("Portfolio System: Initialized");
+        });
+    </script>
+</body>
+
+</html>

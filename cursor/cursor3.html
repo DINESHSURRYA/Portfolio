@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DS Refined Prismatic Cursor</title>
+    <style>
+        :root {
+            --ds-glow: #00f2ff;
+            --ds-sharp: #ffffff;
+        }
+
+        body {
+            background: #020005;
+            height: 100vh;
+            margin: 0;
+            cursor: none;
+            overflow: hidden;
+        }
+
+        /* Adjusted Container for a smaller profile */
+        #ds-cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 40px; 
+            height: 40px;
+            pointer-events: none;
+            z-index: 999999;
+            transform: translate(-50%, -50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Minimized DS Text */
+        .ds-text {
+            font-family: 'Arial Black', sans-serif;
+            font-size: 16px; /* Reduced from 36px */
+            font-weight: 900;
+            color: var(--ds-sharp);
+            animation: ds-pump 0.6s infinite cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            filter: drop-shadow(0 0 8px var(--ds-glow));
+            letter-spacing: -1px;
+            z-index: 2;
+        }
+
+        /* Adjusted the sharp point to fit the smaller text */
+        .sharp-point {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 12px solid white;
+            transform: rotate(-45deg);
+            filter: drop-shadow(0 0 5px var(--ds-glow));
+        }
+
+        @keyframes ds-pump {
+            0%, 100% { transform: scale(1); filter: hue-rotate(0deg) drop-shadow(0 0 8px var(--ds-glow)); }
+            50% { transform: scale(1.15); filter: hue-rotate(180deg) drop-shadow(0 0 15px #ff00ea); }
+        }
+
+        .ds-trail {
+            position: fixed;
+            pointer-events: none;
+            font-family: 'Arial Black', sans-serif;
+            font-weight: 900;
+            z-index: 999998;
+            filter: blur(0.3px);
+            animation: trail-ultra 0.6s forwards cubic-bezier(0.1, 1, 0.1, 1);
+        }
+
+        @keyframes trail-ultra {
+            0% { transform: translate(-50%, -50%) scale(1.2) rotate(0deg); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0) rotate(45deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ds-cursor">
+        <div class="sharp-point"></div>
+        <div class="ds-text">DS</div>
+    </div>
+
+    <script>
+        const cursor = document.getElementById('ds-cursor');
+        let lastX = 0;
+        let lastY = 0;
+        let hue = 0;
+
+        window.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+
+            const dist = Math.hypot(e.clientX - lastX, e.clientY - lastY);
+            
+            if (dist > 12) {
+                createSparkle(e.clientX, e.clientY, dist);
+                lastX = e.clientX;
+                lastY = e.clientY;
+            }
+        });
+
+        function createSparkle(x, y, velocity) {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'ds-trail';
+            sparkle.innerText = 'DS';
+            
+            hue = (hue + 15) % 360;
+            const color = `hsl(${hue}, 100%, 75%)`;
+            
+            sparkle.style.left = x + 'px';
+            sparkle.style.top = y + 'px';
+            sparkle.style.color = color;
+            // Scaled trail size to match minimized cursor
+            sparkle.style.fontSize = Math.min(10 + velocity/5, 24) + 'px'; 
+            sparkle.style.textShadow = `0 0 10px ${color}`;
+
+            document.body.appendChild(sparkle);
+
+            setTimeout(() => {
+                sparkle.remove();
+            }, 600);
+        }
+
+        window.addEventListener('mousedown', (e) => {
+            cursor.style.transform = 'translate(-50%, -50%) scale(0.8)';
+            for(let i=0; i<8; i++) { 
+                const angle = (i / 8) * Math.PI * 2;
+                const vx = Math.cos(angle) * 30;
+                const vy = Math.sin(angle) * 30;
+                
+                const s = document.createElement('div');
+                s.className = 'ds-trail';
+                s.innerText = 'DS';
+                s.style.fontSize = '12px';
+                s.style.left = (e.clientX + vx) + 'px';
+                s.style.top = (e.clientY + vy) + 'px';
+                s.style.color = `hsl(${(hue + i * 40) % 360}, 100%, 80%)`;
+                document.body.appendChild(s);
+                setTimeout(() => s.remove(), 600);
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+        });
+    </script>
+</body>
+</html>
